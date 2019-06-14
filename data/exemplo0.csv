@@ -1,0 +1,10 @@
+Codigo;Nome;Cat;DescCat;Salario;Endereco;Cidade;UF;
+2019001;Estevao;PJ;Programador Junior ;3000.00;Rua das flores, NÂº 123;Santa Maria;RS;
+2019002;Carol;PS;Programador Senior;5000.00;Av. Julio Cezar, 3640;Forno Alegre;RS;
+2019003;Antonio;PJ;Programador Junior;3000.00; Av. Malibu No 9065;Curitiba;PA;
+2019004;Roger;TI;Tecnico em Informatica;2500.00;Rua Ernesto Friedrich, 185 apto. 204;Restinga Seca;RS;
+2019005;Eduardo;TI;Tecnico em Informatica;2500.00;Rua Ernesto Friedrich, 185 apto. 204;Restinga Sêca;RS;
+2019006;EduardoX;PS;Programador Senior;5000.00;Rua Ernesto Friedrich, 185 apto. 204;Porto Alegre;rs;
+2019007;Eduardo1;TI;Tecnico em Informatica;2500.00;Rua Ernesto Friedrich, 185 apto. 204 ;Porto Alegre;RS;
+2019008;Eduardo2;TI; Tecnico em Informatica;2500.00;Rua Ernesto Friedrich, 185 apto. 204;Restinga Seca;RS;
+2019004;Roger;TI;Tecnico em Informatica;2500.00;Rua Ernesto Friedrich, 185 apto. 204;Restinga Seca;RS;

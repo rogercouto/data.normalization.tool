@@ -1,0 +1,70 @@
+{
+	"Projs": [
+		{
+			"CodProj": "LSC001",
+			"Tipo": "Novo Desenv.",
+			"Descr": "Sistema de RH",
+			"Emps":[
+				{
+					"CodEmp" : 2146,
+					"Nome": "Joao",
+					"Cat": "A1",
+					"Sal": 4,
+					"DataIni": "1991-11-01",
+					"TempAl": 24,
+					"Deps" : [
+						{
+							"Nome" : "Filho 1",
+							"Idade": 12
+						},
+						{
+							"Nome" : "Filho 2",
+							"Idade": 12
+						}
+					]
+				},
+				{
+					"CodEmp" : 3145,
+					"Nome": "Silvio",
+					"Cat": "A2",
+					"Sal": 4,
+					"DataIni": "1991-10-02",
+					"TempAl": 24,
+					"Deps" : [
+						{
+							"Nome" : "Filho 1",
+							"Idade": 14
+						},
+						{
+							"Nome" : "Filho 2",
+							"Idade": 10
+						}
+					]
+				}
+			]
+		},
+		{
+			"CodProj": "PAG02",
+			"Tipo": "Manutencao",
+			"Descr": "Sistema de RH",
+			"Emps":[
+				{
+					"CodEmp" : 8291,
+					"Nome": "Mario",
+					"Cat": "A1",
+					"Sal": 4,
+					"DataIni": "1993-05-01",
+					"TempAl": 12,
+					"Deps" : [
+						{
+							"Nome" : "Filho 1"
+						},
+						{
+							"Nome" : "Filho 2"
+						}
+					]
+				}
+			]
+		}
+	]
+}
