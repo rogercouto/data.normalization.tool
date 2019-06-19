@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Spinner;
 
 import dmt.controller.CompModelEditorController;
 import dmt.tools.Util;
+import org.eclipse.swt.widgets.ProgressBar;
 
 public class Dialog23FN extends Dialog {
 
@@ -56,6 +57,7 @@ public class Dialog23FN extends Dialog {
 	protected Label lblTolerance;
 	protected Spinner spnTolerance;
 	protected Label label;
+	protected ProgressBar progressBar;
 
 	/**
 	 * Create the dialog.
@@ -200,6 +202,9 @@ public class Dialog23FN extends Dialog {
 			}
 		});
 		btnSearch.setText("Search");
+		progressBar = new ProgressBar(grpDependences, SWT.NONE);
+		progressBar.setVisible(false);
+		progressBar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		lstFD = new List(grpDependences, SWT.BORDER | SWT.V_SCROLL);
 		lstFD.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		btnPreview = new Button(grpDependences, SWT.NONE);

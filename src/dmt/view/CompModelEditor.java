@@ -9,7 +9,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 public class CompModelEditor extends Composite {
-	
+
 	protected Canvas canvas;
 	protected int hSelection;
 	protected int vSelection;
@@ -24,24 +24,26 @@ public class CompModelEditor extends Composite {
 		setLayout(new FillLayout(SWT.HORIZONTAL));
 		canvas = new Canvas(this, SWT.H_SCROLL | SWT.V_SCROLL);
 		initialize();
-		
+
 	}
 	public CompModelEditor(Composite parent, int style, int canvasStyle) {
 		super(parent, style);
 		setLayout(new FillLayout(SWT.HORIZONTAL));
 		canvas = new Canvas(this, canvasStyle);
 		initialize();
-		
+
 	}
-	
+
 	private void initialize() {
-		if (canvas.getStyle() == (SWT.H_SCROLL | SWT.V_SCROLL)){
+		if (canvas.getHorizontalBar() != null){
 			canvas.getHorizontalBar().addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent arg0) {
 					scrollMoved();
 				}
 			});
+		}
+		if (canvas.getVerticalBar() != null){
 			canvas.getVerticalBar().addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent arg0) {
@@ -55,7 +57,7 @@ public class CompModelEditor extends Composite {
 	@Override
 	protected void checkSubclass() {
 	}
-	
+
 	protected void scrollMoved(){
 		hSelection = canvas.getHorizontalBar().getSelection()*5;
 		vSelection = canvas.getVerticalBar().getSelection()*5;

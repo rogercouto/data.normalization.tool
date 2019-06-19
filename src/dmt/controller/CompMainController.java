@@ -6,16 +6,15 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 
+import dmt.database.ReverseEng;
 import dmt.model.Table;
 import dmt.model.data.TableData;
 import dmt.model.project.DataList;
 import dmt.view.CompMain;
-import dmt.view.TableModel;
 
 public class CompMainController extends CompMain {
 
@@ -26,18 +25,22 @@ public class CompMainController extends CompMain {
 		super(parent, style);
 		initialize();
 	}
-	
+
 	private void initialize(){
 		modelEditor.setDoubleClickListener(new Listener() {
 			@Override
 			public void handleEvent(Event arg0) {
 				Table table = (Table)arg0.data;
-				int mIndex = modelEditor.getTableIndex(table.getName()); 
+				int mIndex = modelEditor.getTableIndex(table.getName());
 				if (openMap.containsKey(table.getName())){
 					int index = openMap.get(table.getName()).intValue();
 					tabFolder.setSelection(index);
 				}else{
 					TableData data = map.get(table.getName());
+					if (!data.isLoaded() && Main.project.getServer() != null){
+						ReverseEng re = new ReverseEng(Main.project.getServer());
+						re.fillData(data);
+					}
 					CompDataEditorController controller = new CompDataEditorController(tabFolder, SWT.NONE);
 					controller.setData(data);
 					controller.setEditTableListener(new Listener() {
@@ -97,10 +100,9 @@ public class CompMainController extends CompMain {
 	private void reload(){
 		modelEditor.clear();
 		map.values().forEach(d->{
-			TableModel model = new TableModel(d.getTable(), new Point(100, 100));
-			modelEditor.addTableModel(model);
+			modelEditor.addTable(d.getTable());
 		});
-		
+		modelEditor.calcPositions();
 	}
 
 }

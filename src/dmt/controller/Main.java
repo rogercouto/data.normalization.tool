@@ -10,6 +10,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Listener;
 
+import dmt.database.Server;
 import dmt.model.data.TableData;
 import dmt.model.project.DataList;
 import dmt.model.project.Project;
@@ -54,7 +55,7 @@ public class Main extends ShellMain {
 			}
 		}
 	}
-	
+
 	private void importJSON(){
 		FileDialog dialog = new FileDialog(shell);
 		dialog.setFilterExtensions(new String[]{"*.json"});
@@ -86,16 +87,24 @@ public class Main extends ShellMain {
 		project = new Project();
 		project.setDataList(new DataList(data));
 		btnSave.setEnabled(true);
+		btnExport.setEnabled(true);
+		mntmSave.setEnabled(true);
+		mntmSaveAs.setEnabled(true);
+		mntmExport.setEnabled(true);
 		activeComp = controller;
 		compCenter.layout(true);
 	}
-	
+
 	private void preprocessData(DataList list){
 		CompMainController controller = new CompMainController(compCenter, SWT.NONE);
 		controller.setDataList(list);
 		project = new Project();
 		project.setDataList(list);
 		btnSave.setEnabled(true);
+		btnExport.setEnabled(true);
+		mntmSave.setEnabled(true);
+		mntmSaveAs.setEnabled(true);
+		mntmExport.setEnabled(true);
 		activeComp = controller;
 		compCenter.layout(true);
 	}
@@ -108,7 +117,7 @@ public class Main extends ShellMain {
 	protected void domntmJsonFilewidgetSelected(SelectionEvent e) {
 		importJSON();
 	}
-	
+
 	public static void main(String[] args) {
 		Main window = new Main();
 		window.open();
@@ -119,7 +128,7 @@ public class Main extends ShellMain {
 		if (project == null)
 			return;
 		if(project.saved()){
-			project.save();
+			Project.save(project);
 		}else{
 			FileDialog dialog = new FileDialog(shell, SWT.SAVE);
 			dialog.setFilterExtensions(new String[]{"*.dnp"});
@@ -127,13 +136,14 @@ public class Main extends ShellMain {
 			File file = new File(fileName);
 			try {
 				file.createNewFile();
-				project.saveAs(file);
+				project.setFile(file);
+				Project.save(project);
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
 		}
 	}
-	
+
 	//Open project
 	protected void domntmOpenwidgetSelected(SelectionEvent e) {
 		FileDialog dialog = new FileDialog(shell);
@@ -144,12 +154,89 @@ public class Main extends ShellMain {
 				activeComp.dispose();
 				activeComp = null;
 			}
-			project = new Project(new File(fileName));
+			
+			project = Project.load(new File(fileName));
 			CompMainController controller = new CompMainController(compCenter, SWT.NONE);
 			controller.setDataList(project.getDataList());
 			activeComp = controller;
 			compCenter.layout(true);
 			btnSave.setEnabled(true);
+			btnExport.setEnabled(true);
+			mntmSave.setEnabled(true);
+			mntmSaveAs.setEnabled(true);
+			mntmExport.setEnabled(true);
+		}
+	}
+
+	protected void dobtnDBwidgetSelected(SelectionEvent e) {
+		DialogConnectionController dialog = new DialogConnectionController(shell);
+		Server server = (Server)dialog.open();
+		if (server != null){
+			if (activeComp != null){
+				activeComp.dispose();
+				activeComp = null;
+			}
+			if (project == null){
+				project = new Project();
+			}
+			Main.project.setServer(server);
+			DialogServerLoadingController window = new DialogServerLoadingController(shell, server);
+			DataList dl = (DataList)window.open();
+			if (dl == null)
+				return;
+			System.out.println("Banco de dados importado em "+window.getTaskTime()+" segundos");
+			project.setDataList(dl);
+			CompMainController controller = new CompMainController(compCenter, SWT.NONE);
+			controller.setDataList(dl);
+			activeComp = controller;
+			compCenter.layout(true);
+			btnSave.setEnabled(true);
+			btnExport.setEnabled(true);
+			mntmSave.setEnabled(true);
+			mntmSaveAs.setEnabled(true);
+			mntmExport.setEnabled(true);
+		}
+	}
+	
+	protected void dobtnSqlwidgetSelected(SelectionEvent e) {
+		if (project != null){
+			DialogExportController dialog = new DialogExportController(shell);
+			dialog.open();
+		}
+	}
+	
+	protected void domntmSaveAswidgetSelected(SelectionEvent e) {
+		if (project != null){
+			FileDialog dialog = new FileDialog(shell, SWT.SAVE);
+			dialog.setFilterExtensions(new String[]{"*.dnp"});
+			String fileName = dialog.open();
+			if (fileName != null){
+				File file = new File(fileName);
+				try {
+					file.createNewFile();
+					project.setFile(file);
+					Project.save(project);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	protected void domntmExportwidgetSelected(SelectionEvent e) {
+		dobtnSqlwidgetSelected(e);
+	}
+	
+	protected void domntmClosewidgetSelected(SelectionEvent e) {
+		if (activeComp != null){
+			activeComp.dispose();
+			activeComp = null;
+			project = null;
+			btnSave.setEnabled(false);
+			btnExport.setEnabled(false);
+			mntmSave.setEnabled(false);
+			mntmSaveAs.setEnabled(false);
+			mntmExport.setEnabled(false);
 		}
 	}
 	

@@ -12,11 +12,12 @@ import dmt.model.Table;
 public class TableData implements Serializable, Cloneable {
 
 	private static final long serialVersionUID = -7430376656350865117L;
-	
+
 	private Table table;
 	private int autoIncrement = 0;
 	private List<RowData> rows = new LinkedList<>();
 	private NormalForm normalForm = NormalForm.NN;
+	private boolean loaded = false;
 
 	public TableData(Table table) {
 		super();
@@ -30,6 +31,7 @@ public class TableData implements Serializable, Cloneable {
 			row.setValue(table.getSurrogateKeyIndex(), ++autoIncrement);
 		}
 		rows.add(row);
+		loaded = true;
 	}
 
 	public String toString(){
@@ -66,12 +68,12 @@ public class TableData implements Serializable, Cloneable {
 		addRow(row);
 		return row;
 	}
-	
+
 	public HashSet<Object> getColumnSet(int index){
 		List<Object> list = rows.stream().map(data -> data.getValue(index)).collect(Collectors.toList());
 		return new HashSet<Object>(list);
 	}
-	
+
 	public HashSet<Object> getColumnSet(String columnName){
 		int index = table.getElementIndex(columnName);
 		return getColumnSet(index);
@@ -91,8 +93,9 @@ public class TableData implements Serializable, Cloneable {
 
 	public void setNormalForm(NormalForm normalForm) {
 		this.normalForm = normalForm;
+		this.table.setNormalForm(normalForm);
 	}
-	
+
 	public TableData clone(){
 		Table newTable = new Table(table.getName());
 		table.getElements().forEach(e->{
@@ -115,4 +118,14 @@ public class TableData implements Serializable, Cloneable {
 		});
 		return data;
 	}
+
+	public boolean isLoaded() {
+		return loaded;
+	}
+
+	public void setLoaded(boolean loaded) {
+		this.loaded = loaded;
+	}
+
+
 }

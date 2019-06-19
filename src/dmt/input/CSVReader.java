@@ -11,7 +11,6 @@ import dmt.model.Column;
 import dmt.model.Table;
 import dmt.model.data.RowData;
 import dmt.model.data.TableData;
-import dmt.tools.Benchmark;
 import dmt.tools.Util;
 
 public class CSVReader {
@@ -156,7 +155,6 @@ public class CSVReader {
 			column.setType(String.class);
 			table.addColumn(column);
 		}
-		//System.out.println(table);
 		TableData data = new TableData(table);
 		for (int i = 0+iInc; i < sample.length; i++) {
 			RowData row = new RowData(table);
@@ -171,41 +169,6 @@ public class CSVReader {
 	public TableData getData(char separator, char stringDelimiter){
 		String[][] sample = getSample(separator, stringDelimiter, -1);
 		return getData(sample);
-	}
-
-	public static void main(String[] args) {
-		Benchmark b = new Benchmark();
-		CSVReader reader = new CSVReader("data/exemplo1.csv");
-		reader.createSurrogateKeys(true);
-		//String[][] sample = reader.getSample(';', '"', -1);
-		//printSample(sample);
-		reader.setColumnNamesIndex(0);
-		//reader.setColumnDescriptionsIndex(0);
-		//reader.setCreateSurrogateKeys(true);
-		TableData data = reader.getData(';','"');
-		System.out.println(data.getTable());
-		data.getRows().forEach(System.out::println);
-		System.out.println(data);
-		//System.out.println(data.getTable().haveNestedTables());
-		//System.out.println("Fim!");
-		b.stop(true);
-		//System.out.println(data);
-		/*
-		Table table = new Table("test", true);
-		Column column = new Column("description");
-		column.setType(String.class);
-		column.setNotNull(true);
-		table.addColumn(column);
-		System.out.println(table);
-		TableData data = new TableData(table);
-		RowData row = new RowData(table);
-		row.setValue("description", "teste");
-		data.addRow(row);
-		RowData row2 = new RowData(table);
-		row2.setValue("description", "aff");
-		data.addRow(row2);
-		System.out.println(data);
-		*/
 	}
 
 }

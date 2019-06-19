@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
@@ -38,8 +37,12 @@ public class CompImportJSONController extends CompImportJSON{
 		this.fileName = fileName;
 		reader = new JSONReader(fileName);
 		table = reader.readTable();
+		/*
 		TableModel model = new TableModel(table, new Point(50, 50));
 		modelEditor1.addTableModel(model);
+		*/
+		modelEditor1.addTable(table);
+		modelEditor1.calcPositions();
 		modelEditor2.setDoubleClickListener(new Listener() {
 			@Override
 			public void handleEvent(Event arg0) {
@@ -50,6 +53,7 @@ public class CompImportJSONController extends CompImportJSON{
 					if (excludedColumns != null){
 						TableModel model = modelEditor2.geteModel(table);
 						model.setExcludedColumns(excludedColumns);
+						modelEditor2.calcPositions();
 						modelEditor2.draw();
 					}
 				}
@@ -80,18 +84,14 @@ public class CompImportJSONController extends CompImportJSON{
 		modelEditor2.draw();
 		if (btnReplicate.getSelection()){
 			Table newTable = Normalize.mixNestedTables(table);
-			TableModel newModel = new TableModel(newTable, new Point(50, 50));
-			modelEditor2.addTableModel(newModel);
+			modelEditor2.addTable(newTable);
+			modelEditor2.calcPositions();
 		}else if (btnSplit.getSelection()){
 			Table nTable = table.clone();
 			nTable.createSurrogateKey();
 			List<Table> list = Normalize.splitNestedTables(nTable);
-			list.forEach(t->{
-				int i = list.indexOf(t);
-				int x = 50+i*(t.getNameWidth()*10);
-				TableModel newModel = new TableModel(t, new Point(x, 50));
-				modelEditor2.addTableModel(newModel);
-			});
+			modelEditor2.addTables(list);
+			modelEditor2.calcPositions();
 		}
 	}
 	

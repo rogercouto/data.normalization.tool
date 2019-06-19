@@ -3,6 +3,7 @@ package dmt.tools;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 
+@Deprecated
 public class GenericThread extends Thread {
 
 	private Listener execListener;
@@ -31,5 +32,5 @@ public class GenericThread extends Thread {
 	public void setDoneListener(Listener doneListener) {
 		this.doneListener = doneListener;
 	}
-	
+
 }

@@ -61,6 +61,7 @@ public class DependencyFinder {
         return dependences;
     }
 
+	@SuppressWarnings("deprecation")
 	public HashMap<String, HashSet<Column>> getAllDependencies(){
     	final int numPks = data.getTable().getPrimaryKeys().size();
     	HashMap<String, HashSet<Column>> map = new HashMap<>();

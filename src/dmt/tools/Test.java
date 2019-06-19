@@ -46,13 +46,12 @@ public class Test {
         System.out.println("ALOJAM_ALUNO: "+d4.size());
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "deprecation" })
 	public static void test2(final TableData data){
 		for (int i = 0; i < columns.length; i++) {
 			final int index = i;
 			GenericThread thread = new GenericThread();
 			thread.setExecListener(new Listener() {
-				@SuppressWarnings("deprecation")
 				@Override
 				public void handleEvent(Event arg0) {
 					arg0.data = Normalize.getDependencies(data, columns[index], 1, 1.0);

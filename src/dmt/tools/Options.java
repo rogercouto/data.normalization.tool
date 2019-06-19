@@ -56,6 +56,7 @@ public class Options {
 		return 2;
 	}
 	
+	@Deprecated
 	public static boolean paralelize(){
 		return true;
 	}

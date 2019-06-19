@@ -1,16 +1,36 @@
 package dmt.database;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.LinkedList;
 import java.util.List;
 
+import dmt.model.Column;
+
 public class PostgresServer extends Server {
+
+	private static final long serialVersionUID = 2666926609387563596L;
+
+	public PostgresServer() {
+	}
+
+	public PostgresServer(String server, int port, String userName, String password){
+		this.server = server;
+		if (port >= 0)
+			this.port = port;
+		this.userName = userName;
+		this.password = password;
+	}
 
 	public PostgresServer(String server, int port, String databaseName, String userName, String password){
 		this.server = server;
-		this.port = port;
+		if (port >= 0)
+			this.port = port;
 		this.name = databaseName;
 		this.userName = userName;
 		this.password = password;
@@ -68,6 +88,33 @@ public class PostgresServer extends Server {
 	@Override
 	public String surrogateKeyDbType() {
 		return "serial";
+	}
+
+	@Override
+	public String getDatabaseType(Column column) {
+		if (column.isSurrogateKey())
+			return "serial";
+		else if (column.getType().equals(String.class))
+			return "varchar(255)";
+		else if (column.getType().equals(Character.class))
+			return "char(1)";
+		else if (column.getType().equals(Boolean.class))
+			return "bool";
+		else if (column.getType().equals(Integer.class))
+			return "int";
+		else if (column.getType().equals(Long.class))
+			return "int8";
+		else if (column.getType().equals(Float.class))
+			return "float4";
+		else if (column.getType().equals(Double.class))
+			return "float8";
+		else if (column.getType().equals(LocalDateTime.class)||column.getType().equals(Date.class))
+			return "datetime";
+		else if (column.getType().equals(LocalDate.class))
+			return "date";
+		else if (column.getType().equals(LocalTime.class))
+			return "time";
+		return "varchar(255)";
 	}
 
 }

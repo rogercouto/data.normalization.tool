@@ -1,5 +1,6 @@
 package dmt.database;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -8,11 +9,15 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
+import dmt.model.Column;
+
 /**
  * Classe que implementa o servidor de banco de dados utilizado
  * @author roger
  */
-abstract class Server {
+public abstract class Server implements Serializable{
+
+	private static final long serialVersionUID = 5683012944851908599L;
 
 	protected String name;
 	protected String server;
@@ -52,4 +57,11 @@ abstract class Server {
 	}
 
 	public abstract String surrogateKeyDbType();
+
+	public void setDatabaseName(String databaseName){
+		this.name = databaseName;
+	}
+	
+	public abstract String getDatabaseType(Column column);
+
 }

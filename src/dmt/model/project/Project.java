@@ -6,38 +6,45 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import dmt.database.Server;
 import dmt.model.Column;
 import dmt.model.Table;
 import dmt.model.data.TableData;
 
-public class Project {
+public class Project implements Serializable{
+
+	private static final long serialVersionUID = -892922020117331494L;
 
 	private File file = null;
 
 	private DataList dataList = new DataList();
 
+	private Server server = null;
+
 	public Project() {
 		super();
 	}
 
-	public Project(File file) {
-		super();
+	public static Project load(File file) {
+		Project project = null;
 		try {
 			FileInputStream fis = new FileInputStream(file);
 			ObjectInputStream ois = new ObjectInputStream(fis);
 			Object obj = ois.readObject();
-			if (obj.getClass().equals(DataList.class)){
+			if (obj.getClass().equals(Project.class)){
 				ois.close();
-				dataList = (DataList)obj;
+				project = (Project)obj;
 			}
 			ois.close();
 		} catch (IOException | ClassNotFoundException e) {
 			throw new RuntimeException(e.getMessage());
 		}
+		return project;
 	}
 
 	public void setDataList(DataList dataList){
@@ -52,22 +59,25 @@ public class Project {
 		return file != null;
 	}
 
-	public void save(){
-		if (file == null)
+	public File getFile() {
+		return file;
+	}
+
+	public void setFile(File file) {
+		this.file = file;
+	}
+
+	public static void save(Project project){
+		if (project.getFile() == null)
 			throw new RuntimeException("Project.save: File not set!");
 		try {
-			FileOutputStream fos = new FileOutputStream(file);
+			FileOutputStream fos = new FileOutputStream(project.getFile());
 			ObjectOutputStream oos = new ObjectOutputStream(fos);
-			oos.writeObject(dataList);
+			oos.writeObject(project);
 			oos.close();
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage());
 		}
-	}
-
-	public void saveAs(File file){
-		this.file = file;
-		save();
 	}
 
 	private boolean haveTable(String tableName){
@@ -117,7 +127,7 @@ public class Project {
 		});
 		checkFks();
 	}
-	
+
 	public void addOrReplace(TableData data){
 		if (dataList.haveTable(data.getTable()))
 			dataList.replace(data);
@@ -132,5 +142,15 @@ public class Project {
 			return op.get();
 		return null;
 	}
-	
+
+	public Server getServer() {
+		return server;
+	}
+
+	public void setServer(Server server) {
+		this.server = server;
+	}
+
+
+
 }

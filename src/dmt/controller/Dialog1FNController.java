@@ -3,14 +3,12 @@ package dmt.controller;
 import java.util.List;
 
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
 import dmt.model.Column;
 import dmt.model.data.TableData;
 import dmt.model.project.DataList;
 import dmt.normalization.Normalize;
-import dmt.view.TableModel;
 import dmt.view.Dialog1FN;
 
 public class Dialog1FNController extends Dialog1FN {
@@ -29,7 +27,8 @@ public class Dialog1FNController extends Dialog1FN {
 	}
 
 	private void initialize() {
-		modelEditor1.addTableModel(new TableModel(data.getTable(), new Point(50,50)));
+		modelEditor1.addTable(data.getTable());
+		modelEditor1.calcPositions();
 		refresh();
 	}
 	
@@ -45,22 +44,24 @@ public class Dialog1FNController extends Dialog1FN {
 		modelEditor2.clear();
 		List<Column> columns = Normalize.findMultiValuedColumns(data, seps);
 		if (columns.size() == 0){
+			modelEditor2.calcPositions();
 			modelEditor2.draw();
 			return;
 		}
 		if (checkSingle.getSelection()){
 			TableData nd = Normalize.splitColumns(data, seps);
-			modelEditor2.addTableModel(new TableModel(nd.getTable(), new Point(50,50)));
+			modelEditor2.addTable(nd.getTable());
 			res = new DataList(nd);
 		}else if (chkMulti.getSelection()){
 			List<TableData> list = Normalize.splitColumnsToList(data, seps);
 			DataList dl = new DataList();
 			list.forEach(d->{
-				modelEditor2.addTableModel(new TableModel(d.getTable(), new Point(50,50)));
+				modelEditor2.addTable(d.getTable());
 				dl.add(d);
 			});
 			res = dl;
 		}
+		modelEditor2.calcPositions();
 		modelEditor2.draw();
 	}
 

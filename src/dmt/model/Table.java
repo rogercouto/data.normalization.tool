@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import dmt.model.data.NormalForm;
 import dmt.tools.Options;
 
 /**
@@ -25,7 +26,8 @@ public class Table extends Element implements Cloneable{
 	private int surrogateKeyIndex = -1;
 	private boolean haveNestedTables = false;
 	private boolean havePrimaryKey = false;
-
+	private NormalForm normalForm = NormalForm.NN;
+	
 	public Table() {
 		super();
 	}
@@ -230,7 +232,10 @@ public class Table extends Element implements Cloneable{
 	 * @return coluna
 	 */
 	public Column getColumn(String columnName){
-		Element e = elements.get(getElementIndex(columnName));
+		int index = getElementIndex(columnName);
+		if (index < 0)
+			return null;
+		Element e = elements.get(index);
 		if (!e.getClass().equals(Column.class))
 			throw new RuntimeException(
 					String.format("getColumn: element with name %s is not a column!",columnName));
@@ -271,6 +276,20 @@ public class Table extends Element implements Cloneable{
 					String.format("removeColumn: element with name %s is not a column!",columnName));
 		int index = getElementIndex(columnName);
 		elements.remove(index);
+	}
+
+	public NormalForm getNormalForm() {
+		return normalForm;
+	}
+	
+	public String getNfToString() {
+		if(normalForm == null)
+			normalForm = NormalForm.NN;
+		return String.format("(%s)", normalForm.toString());
+	}
+
+	public void setNormalForm(NormalForm nf) {
+		this.normalForm = nf;
 	}
 
 	public void removeColumns(Collection<Column> columns){
@@ -504,7 +523,7 @@ public class Table extends Element implements Cloneable{
 			setElementName(skName, newSkName);
 		}
 	}
-	
+
 	public void addElement(Element e){
 		elements.add(e);
 	}

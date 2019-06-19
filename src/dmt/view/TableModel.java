@@ -52,6 +52,10 @@ public class TableModel {
 
 	private static int calculeWidth(Table t){
 		OptionalInt oMax = t.getElements().stream().mapToInt(e->e.getNameWidth()).max();
+		if (oMax.isPresent()){
+			if (t.getNameWidth()+100 > oMax.getAsInt())
+				return t.getNameWidth()+100;
+		}
 		return oMax.isPresent()?oMax.getAsInt()+50:200;
 	}
 
@@ -84,7 +88,7 @@ public class TableModel {
 		gc.fillRectangle(tNameRect);
 		gc.drawRectangle(tNameRect);
 		gc.drawLine(rect.x-hSel, rect.y-vSel+20, rect.width+rect.x-hSel, rect.y-vSel+20);
-		gc.drawText(getTable().getName(), rect.x-hSel+3, rect.y-vSel+3);
+		gc.drawText(getTable().getName().concat(" ").concat(getTable().getNfToString()), rect.x-hSel+3, rect.y-vSel+3);
 		gc.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
 		table.getColumns().forEach(c->{
 			int yDesl = getTable().getElementIndex(c.getName());

@@ -15,7 +15,7 @@ public class Column extends Element implements Cloneable{
 	private boolean primaryKey;
 	private boolean surrogateKey;
 	private boolean notNull;
-	private boolean unique;
+	private boolean unique = false;
 	private Column foreignKey;
 	private Integer size;
 

@@ -15,11 +15,12 @@ import java.util.Stack;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.eclipse.swt.widgets.ProgressBar;
+
 import dmt.input.CSVReader;
 import dmt.model.Column;
 import dmt.model.data.RowData;
 import dmt.model.data.TableData;
-import dmt.normalization.DependencyFinder;
 import dmt.normalization.Normalize;
 import dmt.tools.Benchmark;
 import dmt.tools.IntCounter;
@@ -32,6 +33,7 @@ public class FDMapper {
 	private int maxLevel = 5;
 	private List<Column> columns = null;
 	private int maxData = 50;
+	private ProgressBar progressBar;
 	
 	public FDMapper(TableData data) {
 		super();
@@ -74,6 +76,13 @@ public class FDMapper {
 
 	public void setMaxData(int maxData) {
 		this.maxData = maxData;
+	}
+
+	public void setProgressBar(ProgressBar progressBar) {
+		this.progressBar = progressBar;
+		if (this.progressBar != null){
+			progressBar.setMaximum(100);
+		}
 	}
 
 	@SuppressWarnings("unused")
@@ -155,10 +164,14 @@ public class FDMapper {
 	}
 	
 	public List<FD> getFDs(){
+		if (progressBar != null)
+			progressBar.setSelection(0);
 		HashMap<String, FD> res = new HashMap<>();
 		HashMap<String, HashMap<String,FDMap>> map = generateMap();
 		map.forEach((k1,subHash)->{
 			subHash.forEach((k2,fdMap)->{
+				if (progressBar != null)
+					progressBar.setSelection(progressBar.getSelection()+1);
 				if (fdMap.getMinDependencePerc()>=tolerance){
 					String key = fdMap.getKey();
 					if (res.containsKey(key)){
@@ -244,10 +257,10 @@ public class FDMapper {
 	}
 	
 	public static void main(String[] args) {
-		testZero();
+		testOld();
 	}
 
-	private static void testZero(){
+	protected static void testZero(){
 		CSVReader reader = new CSVReader("data/funcionario_dm.csv");
 		String[][] sample = reader.getSample(';', '"', -1);
 		TableData data = reader.getData(sample);
@@ -281,26 +294,28 @@ public class FDMapper {
 		});
 	}
 	
-	protected void testOld(){
+	protected static void testOld(){
 		Benchmark b = new Benchmark();
 		System.out.println("READING DATA ...");
 		CSVReader reader = new CSVReader("data/CADASTRO_MATRICULAS_REGIAO_SUL_2012.csv");
 		reader.setColumnDescriptionsIndex(0);
 		reader.setColumnNamesIndex(1);
-		String[][] sample = reader.getSample(';', '"', 200);
+		String[][] sample = reader.getSample(';', '"', -1);
 		TableData data = reader.getData(sample);
 		b.stop(true);
+		/*
 		System.out.println("GETTING DEPENDENCES OLD ...");
 		b.start();
 		data.getTable().getColumn(1).setPrimaryKey(true);
 		DependencyFinder df = new DependencyFinder(data);
 		System.out.println(df.getAllDependencies().size());
 		b.stop(true);
-		/*
 		*/
 		b.start();
 		System.out.println("GETTING DEPENDENCES NEW ...");
 		FDMapper mapper = new FDMapper(data);
+		mapper.setMaxLevel(1);
+		mapper.setMaxData(300);
 		List<FD> fds = mapper.getFDs();
 		System.out.println(fds.size());
 		b.stop(true);

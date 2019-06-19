@@ -33,13 +33,19 @@ public class ShellMain {
 	protected Composite compCenter;
 	protected MenuItem menuProject;
 	protected Menu menu_2;
-	protected MenuItem mntmNewItem;
+	protected MenuItem mntmSave;
 	protected ToolItem btnOpen;
 	protected ToolItem btnSave;
 	protected ToolItem btnDB;
 	protected ToolItem toolItem;
 	protected MenuItem mntmJsonFile;
 	protected MenuItem mntmOpen;
+	protected MenuItem mntmDatabase;
+	protected ToolItem toolItem_1;
+	protected ToolItem btnExport;
+	protected MenuItem mntmExport;
+	protected MenuItem mntmSaveAs;
+	protected MenuItem mntmClose;
 
 	/**
 	 * Launch the application.
@@ -90,8 +96,6 @@ public class ShellMain {
 		menuProject.setText("Project");
 		menu_2 = new Menu(menuProject);
 		menuProject.setMenu(menu_2);
-		mntmNewItem = new MenuItem(menu_2, SWT.NONE);
-		mntmNewItem.setText("Save...");
 		mntmOpen = new MenuItem(menu_2, SWT.NONE);
 		mntmOpen.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -100,6 +104,26 @@ public class ShellMain {
 			}
 		});
 		mntmOpen.setText("Open...");
+		mntmSave = new MenuItem(menu_2, SWT.NONE);
+		mntmSave.setEnabled(false);
+		mntmSave.setText("Save...");
+		mntmSaveAs = new MenuItem(menu_2, SWT.NONE);
+		mntmSaveAs.setEnabled(false);
+		mntmSaveAs.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				domntmSaveAswidgetSelected(e);
+			}
+		});
+		mntmSaveAs.setText("Save as...");
+		mntmClose = new MenuItem(menu_2, SWT.NONE);
+		mntmClose.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				domntmClosewidgetSelected(e);
+			}
+		});
+		mntmClose.setText("Close");
 		mntmNewSubmenu = new MenuItem(menu, SWT.CASCADE);
 		mntmNewSubmenu.setText("Import");
 		menu_1 = new Menu(mntmNewSubmenu);
@@ -120,6 +144,23 @@ public class ShellMain {
 			}
 		});
 		mntmJsonFile.setText("JSON File...");
+		mntmDatabase = new MenuItem(menu_1, SWT.NONE);
+		mntmDatabase.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				domntmDatabasewidgetSelected(e);
+			}
+		});
+		mntmDatabase.setText("Database...");
+		mntmExport = new MenuItem(menu, SWT.NONE);
+		mntmExport.setEnabled(false);
+		mntmExport.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				domntmExportwidgetSelected(e);
+			}
+		});
+		mntmExport.setText("Export...");
 		toolBar_1 = new ToolBar(shell, SWT.FLAT);
 		toolBar_1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		toolBar_1.setBackground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
@@ -156,8 +197,25 @@ public class ShellMain {
 		btnJson.setToolTipText("Import from JSON");
 		btnJson.setImage(SWTResourceManager.getImage(ShellMain.class, "/icon/json32.png"));
 		btnDB = new ToolItem(toolBar_1, SWT.NONE);
+		btnDB.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				dobtnDBwidgetSelected(e);
+			}
+		});
 		btnDB.setImage(SWTResourceManager.getImage(ShellMain.class, "/icon/database32.png"));
 		btnDB.setToolTipText("Import From SGBD");
+		toolItem_1 = new ToolItem(toolBar_1, SWT.SEPARATOR);
+		btnExport = new ToolItem(toolBar_1, SWT.NONE);
+		btnExport.setEnabled(false);
+		btnExport.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				dobtnSqlwidgetSelected(e);
+			}
+		});
+		btnExport.setToolTipText("Import From SGBD");
+		btnExport.setImage(SWTResourceManager.getImage(ShellMain.class, "/icon/export32.png"));
 		btnCsv.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -195,5 +253,18 @@ public class ShellMain {
 	}
 	protected void dobtnOpenwidgetSelected(SelectionEvent e) {
 		domntmOpenwidgetSelected(e);
+	}
+	protected void domntmDatabasewidgetSelected(SelectionEvent e) {
+		dobtnDBwidgetSelected(e);
+	}
+	protected void dobtnDBwidgetSelected(SelectionEvent e) {
+	}
+	protected void dobtnSqlwidgetSelected(SelectionEvent e) {
+	}
+	protected void domntmSaveAswidgetSelected(SelectionEvent e) {
+	}
+	protected void domntmExportwidgetSelected(SelectionEvent e) {
+	}
+	protected void domntmClosewidgetSelected(SelectionEvent e) {
 	}
 }

@@ -126,6 +126,7 @@ public class Normalize {
                 Column fk = key.clone();
                 fk.setPrimaryKey(false);
                 fk.setSurrogateKey(false);
+                fk.setUnique(false);
                 fk.setForeignKey(key);
                 t1.addColumn(fk);
             }
@@ -554,14 +555,17 @@ public class Normalize {
             fkTable.addColumn(valueColumn);
             TableData fkData = new TableData(fkTable);
             for (RowData row : data.getRows()) {
-                String[] rowValues = split(row.getValue(column.getName()).toString(), separators);
-                for (String value : rowValues) {
-                    RowData newRow = fkData.createRow();
-                    for (Column pk : parentKeys) {
-                        Object pkValue = row.getValue(pk.getName());
-                        newRow.setValue(pk.getName(), pkValue);
-                    }
-                    newRow.setValue(valueColumn.getName(), value.trim());
+                Object rowValue = row.getValue(column.getName());
+                if (rowValue != null){
+                	String[] rowValues = split(rowValue.toString(), separators);
+                	for (String value : rowValues) {
+                		RowData newRow = fkData.createRow();
+                		for (Column pk : parentKeys) {
+                			Object pkValue = row.getValue(pk.getName());
+                			newRow.setValue(pk.getName(), pkValue);
+                		}
+                		newRow.setValue(valueColumn.getName(), value.trim());
+                	}
                 }
             }
             list.add(fkData);
@@ -593,21 +597,23 @@ public class Normalize {
     		List<Column> oc = data.getTable().getColumns().stream()
     				.filter(c -> c.getName().compareTo(column.getName()) != 0)
     				.collect(Collectors.toList());
-
-    		String[] rowValues = split(r.getValue(column.getName()).toString(), separators);
-    		for (String value : rowValues) {
-    			RowData row = new RowData(newTable);
-    			//Setar o valor original
-    			oc.forEach(c->{
-    				if (!c.isSurrogateKey()){
-    					row.setValue(c.getName(), Util.copyObject(r.getValue(c.getName())));
-    				}else{
-    					row.setValue(c.getName(), skg.inc());
-    				}
-    			});
-    			//Setar o novo valor
-    			row.setValue(newName, value);
-    			newData.addRow(row);
+    		Object rowValue = r.getValue(column.getName());
+    		if (rowValue != null){
+    			String[] rowValues = split(rowValue.toString(), separators);
+    			for (String value : rowValues) {
+    				RowData row = new RowData(newTable);
+    				//Setar o valor original
+    				oc.forEach(c->{
+    					if (!c.isSurrogateKey()){
+    						row.setValue(c.getName(), Util.copyObject(r.getValue(c.getName())));
+    					}else{
+    						row.setValue(c.getName(), skg.inc());
+    					}
+    				});
+    				//Setar o novo valor
+    				row.setValue(newName, value);
+    				newData.addRow(row);
+    			}
     		}
     	});
     	return newData;
@@ -982,6 +988,7 @@ public class Normalize {
     	Column fk = fkTable.getSurrogateKey().clone();
     	fk.setPrimaryKey(false);
     	fk.setSurrogateKey(false);
+    	fk.setUnique(false);
     	fk.setForeignKey(fkTable.getSurrogateKey());
     	rTable.addColumn(fk);
     	TableData fkData = new TableData(fkTable);

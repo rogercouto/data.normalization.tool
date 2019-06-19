@@ -1,6 +1,11 @@
 package dmt.model.data;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Date;
 import java.util.List;
 
 import dmt.model.Column;
@@ -40,6 +45,38 @@ public class RowData implements Serializable{
 		if (index < 0)
 			return null;
 		return data[index];	
+	}
+	
+	public String getDbValue(String columnName){
+		Object value = getValue(columnName);
+		StringBuilder builder = new StringBuilder();
+		Column column = table.getColumn(columnName);
+		boolean delimiter = false;
+		if (column.getType().equals(String.class)
+			||(column.getType().equals(Character.class))
+			||(column.getType().equals(Date.class))
+			||(column.getType().equals(LocalDate.class))
+			||(column.getType().equals(LocalTime.class))
+			||(column.getType().equals(LocalDateTime.class))){
+			delimiter = true;
+		}
+		if (delimiter)
+			builder.append('\'');
+		if (column.getDbType().equals(Date.class) || column.getType().equals(LocalDateTime.class)){
+			String formattedValue = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format((Date)value);
+			builder.append(formattedValue);
+		}else if (column.getDbType().equals(LocalDate.class)){
+			String formattedValue = new SimpleDateFormat("yyyy-MM-dd").format((Date)value);
+			builder.append(formattedValue);
+		}else if (column.getDbType().equals(LocalTime.class)){
+			String formattedValue = new SimpleDateFormat("HH:mm:ss").format((Date)value);
+			builder.append(formattedValue);
+		}else{
+			builder.append(value.toString());
+		}
+		if (delimiter)
+			builder.append('\'');
+		return builder.toString();
 	}
 
 	public void setValue(int index, Object value){
