@@ -14,7 +14,7 @@ import dmt.model.Table;
 public class RowData implements Serializable{
 
 	private static final long serialVersionUID = -2811403323790781849L;
-	
+
 	private Table table;
 	private Object[] data;
 
@@ -39,14 +39,14 @@ public class RowData implements Serializable{
 		}
 		return s;
 	}
-	
+
 	public Object getValue(String columnName){
 		int index = table.getColumnIndexIfExists(columnName);
 		if (index < 0)
 			return null;
-		return data[index];	
+		return data[index];
 	}
-	
+
 	public String getDbValue(String columnName){
 		Object value = getValue(columnName);
 		StringBuilder builder = new StringBuilder();
@@ -121,5 +121,19 @@ public class RowData implements Serializable{
 		}
 		return null;
 	}
-	
+
+	public void removeColumns(List<Integer> indices){
+		Object[] copy = new Object[data.length];
+		for (int i = 0; i < copy.length; i++) {
+			copy[i] = data[i];
+		}
+		data = new Object[copy.length-indices.size()];
+		int index = 0;
+		for (int i = 0; i < copy.length; i++) {
+			if (!indices.contains(i)){
+				data[index++] = copy[i];
+			}
+		}
+	}
+
 }

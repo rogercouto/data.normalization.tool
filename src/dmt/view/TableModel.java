@@ -63,7 +63,7 @@ public class TableModel {
 		return t.getColumns().size() * 20 + 25;
 	}
 
-	
+
 	public Point calculateSize(Table table){
 		Point size = new Point(calculeWidth(table), calculeHeigth(table));
 		table.getSubtables().forEach(t->{
@@ -73,12 +73,12 @@ public class TableModel {
 		});
 		return size;
 	}
-	
+
 	public Point calculeSize(){
 		return calculateSize(table);
 	}
-	
-	public void draw(GC gc, int hSel, int vSel){
+
+	public void draw(GC gc, int hSel, int vSel, boolean showNF){
 		Rectangle tNameRect = new Rectangle(rect.x-hSel, rect.y-vSel, rect.width, 20);
 		Rectangle rectangle = new Rectangle(rect.x-hSel, rect.y-vSel, rect.width, rect.height);
 		gc.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
@@ -88,14 +88,20 @@ public class TableModel {
 		gc.fillRectangle(tNameRect);
 		gc.drawRectangle(tNameRect);
 		gc.drawLine(rect.x-hSel, rect.y-vSel+20, rect.width+rect.x-hSel, rect.y-vSel+20);
-		gc.drawText(getTable().getName().concat(" ").concat(getTable().getNfToString()), rect.x-hSel+3, rect.y-vSel+3);
+		StringBuilder nameBuilder = new StringBuilder();
+		nameBuilder.append(getTable().getName());
+		if (showNF){
+			nameBuilder.append(' ');
+			nameBuilder.append(getTable().getNfToString());
+		}
+		gc.drawText(nameBuilder.toString(), rect.x-hSel+3, rect.y-vSel+3);
 		gc.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
 		table.getColumns().forEach(c->{
 			int yDesl = getTable().getElementIndex(c.getName());
 			gc.drawText(c.getName(), rect.x-hSel+25, rect.y-vSel+20*yDesl+25);
 			Optional<Column> opc = excludedColumns.stream().filter(ec->ec.getName().compareTo(c.getName())==0).findFirst();
 			if (opc.isPresent())
-				gc.drawLine(rect.x-hSel+5, rect.y-vSel+20*yDesl+32, rect.x+rect.width-hSel-5, rect.y-vSel+20*yDesl+32);
+				gc.drawLine(rect.x-hSel+5, rect.y-vSel+20*yDesl+33, rect.x+rect.width-hSel-5, rect.y-vSel+20*yDesl+33);
 			if (c.isPrimaryKey() && c.getForeignKey() == null){
 				gc.drawImage(SWTResourceManager.getImage(TableModel.class, "/icon/key0.png"), rect.x-hSel+5, rect.y-vSel+20*yDesl+25);
 			}else if (c.getForeignKey() != null && !c.isPrimaryKey()){
@@ -107,7 +113,7 @@ public class TableModel {
 		table.getSubtables().forEach(t->{
 			int yDesl = getTable().getElementIndex(t.getName());
 			TableModel model = new TableModel(t, new Point(rect.x-hSel+5, rect.y-vSel+20*yDesl+25));
-			model.draw(gc, hSel, vSel);
+			model.draw(gc, hSel, vSel, showNF);
 		});
 	}
 

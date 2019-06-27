@@ -24,7 +24,6 @@ import dmt.view.CompImportCSV;
 public class CompImportCSVController extends CompImportCSV{
 
 	private String[][] matrix = null;
-	private String tableName = "";
 
 	private int page = 1;
 	private double maxPages;
@@ -35,11 +34,11 @@ public class CompImportCSVController extends CompImportCSV{
 	}
 
 	public String getTableName() {
-		return tableName;
+		return txtTableName.getText();
 	}
 
 	public void setTableName(String tableName) {
-		this.tableName = tableName;
+		txtTableName.setText(tableName);
 	}
 
 	public void setMatrix(String[][] matrix){
@@ -65,7 +64,7 @@ public class CompImportCSVController extends CompImportCSV{
 		spinnerBegin.setSelection(1);
 		spinnerEnd.setMinimum(1);
 		spinnerEnd.setMaximum(matrix.length-1);
-		spinnerEnd.setSelection(matrix.length-2);
+		spinnerEnd.setSelection(matrix.length-1);
 		reload();
 	}
 
@@ -193,24 +192,26 @@ public class CompImportCSVController extends CompImportCSV{
 	}
 
 	protected void dobtnImportwidgetSelected(SelectionEvent e) {
-		MatrixReader reader = new MatrixReader();
-		reader.setTableName(tableName);
-		reader.setColumnNamesIndex(spinnerNames.getSelection());
-		if (!checkBox.getSelection())
-			reader.setColumnDescriptionsIndex(spinnerDescriptions.getSelection());
-		reader.setBegin(spinnerBegin.getSelection());
-		reader.setEnd(spinnerEnd.getSelection());
-		reader.setCreateSurrogateKeys(true);
-		TableData data = reader.getData(subMatrix());
-		if (comboTypes.getSelectionIndex() == 1)
-			Normalize.matchBestTypes(data);
-		if (importListener != null){
-			Event event = new Event();
-			event.data = data;
-			importListener.handleEvent(event);
+		if (txtTableName.getText().trim().length() > 0){
+			MatrixReader reader = new MatrixReader();
+			reader.setTableName(txtTableName.getText());
+			reader.setColumnNamesIndex(spinnerNames.getSelection());
+			if (!checkBox.getSelection())
+				reader.setColumnDescriptionsIndex(spinnerDescriptions.getSelection());
+			reader.setBegin(spinnerBegin.getSelection());
+			reader.setEnd(spinnerEnd.getSelection());
+			reader.setCreateSurrogateKeys(true);
+			TableData data = reader.getData(subMatrix());
+			if (comboTypes.getSelectionIndex() == 1)
+				Normalize.matchBestTypes(data);
+			if (importListener != null){
+				Event event = new Event();
+				event.data = data;
+				importListener.handleEvent(event);
+			}
 		}
 	}
-	
+
 	protected void dotxtSeparatormodifyText(ModifyEvent arg0) {
 		reload();
 	}

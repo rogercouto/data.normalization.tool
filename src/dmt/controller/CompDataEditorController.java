@@ -28,6 +28,7 @@ public class CompDataEditorController extends CompDataEditor {
 	private char[] seps;
 
 	private Listener editTableListener;
+	private Listener preprocessListener;
 	private Listener normalizeListener;
 
 	public CompDataEditorController(Composite parent, int style) {
@@ -35,6 +36,8 @@ public class CompDataEditorController extends CompDataEditor {
 		cmbActions.add("Edit table...");
 		cmbActions.add("Refine column...");
 		cmbActions.add("Clusterize column...");
+		cmbActions.add("Split column...");
+		cmbActions.add("Join columns...");
 		cmbActions.add("Check normal form...");
 		cmbActions.add("Normalize...");
 	}
@@ -69,6 +72,14 @@ public class CompDataEditorController extends CompDataEditor {
 
 	public void setNormalizeListener(Listener normalizeListener) {
 		this.normalizeListener = normalizeListener;
+	}
+
+	public Listener getPreprocessListener() {
+		return preprocessListener;
+	}
+
+	public void setPreprocessListener(Listener preprocessListener) {
+		this.preprocessListener = preprocessListener;
 	}
 
 	private void reload(){
@@ -156,15 +167,21 @@ public class CompDataEditorController extends CompDataEditor {
 			editTable();
 			break;
 		case 1:
-			refineTable();
+			refineColumn();
 			break;
 		case 2:
-			clusterizeTable();
+			clusterizeColumn();
 			break;
 		case 3:
-			checkNormalTable();
+			splitColumn();
 			break;
 		case 4:
+			mixColumn();
+			break;
+		case 5:
+			checkNormalTable();
+			break;
+		case 6:
 			normalizeTable();
 			break;
 		default:
@@ -174,43 +191,83 @@ public class CompDataEditorController extends CompDataEditor {
 
 	private void editTable(){
 		DialogModifyTableController dialog = new DialogModifyTableController(getShell(), data);
-		TableData newData = (TableData)dialog.open();
-		if (newData != null){
-			if (newData.getTable().getElementCount()!=data.getTable().getElementCount()){
-				removeTable();
-				removeNav();
-				createTable();
-				createNav();
-				newData.getTable().getColumns().forEach(c->{
-					TableColumn column = new TableColumn(table, SWT.NONE);
-					column.setText(c.getName());
-					column.pack();
-				});
-				this.layout(true);
-			}
+		boolean modified = (boolean)dialog.open();
+		if (modified){
+			removeTable();
+			removeNav();
+			createTable();
+			createNav();
+			data.getTable().getColumns().forEach(c->{
+				TableColumn column = new TableColumn(table, SWT.NONE);
+				column.setText(c.getName());
+				column.pack();
+			});
 			if (editTableListener != null){
 				Event e = new Event();
-				e.data = newData;
+				e.data = data;
 				editTableListener.handleEvent(e);
 			}
-			data = newData;
+			this.layout(true);
+			reload();
 		}
 		cmbActions.deselectAll();
-		reload();
 	}
 
-	private void clusterizeTable(){
+	private void clusterizeColumn(){
 		DialogClusterizeController dialog = new DialogClusterizeController(getShell(), data);
 		dialog.open();
 		cmbActions.deselectAll();
 		reload();
 	}
 
-	private void refineTable(){
+	private void refineColumn(){
 		DialogRefineController dialog = new DialogRefineController(getShell(), data);
 		dialog.open();
 		cmbActions.deselectAll();
 		reload();
+	}
+
+	private void splitColumn(){
+		DialogSplitController dialog = new DialogSplitController(getShell(), data);
+		TableData newData = (TableData)dialog.open();
+		if (newData != null){
+			if (preprocessListener != null){
+				Event e = new Event();
+				e.data = newData;
+				preprocessListener.handleEvent(e);
+			}
+			data = newData;
+			new TableColumn(table, SWT.NONE);
+			TableColumn[] columns = table.getColumns();
+			for (int i = 0; i < newData.getTable().getColumns().size(); i++) {
+				String name = data.getTable().getColumn(i).getName();
+				columns[i].setText(name);
+			}
+			cmbActions.deselectAll();
+			reload();
+		}
+	}
+
+	private void mixColumn(){
+		DialogMixController dialog = new DialogMixController(getShell(), data);
+		TableData newData = (TableData)dialog.open();
+		if (newData != null){
+			if (preprocessListener != null){
+				Event e = new Event();
+				e.data = newData;
+				preprocessListener.handleEvent(e);
+			}
+			data = newData;
+			if (data.getTable().getColumns().size() > table.getColumnCount())
+				new TableColumn(table, SWT.NONE);
+			TableColumn[] columns = table.getColumns();
+			for (int i = 0; i < data.getTable().getColumns().size(); i++) {
+				String name = data.getTable().getColumn(i).getName();
+				columns[i].setText(name);
+			}
+			cmbActions.deselectAll();
+			reload();
+		}
 	}
 
 	private void checkNormalTable(){
@@ -236,6 +293,7 @@ public class CompDataEditorController extends CompDataEditor {
 			dl = (DataList) dialog.open();
 		}
 		if (dl != null){
+			Main.project.getDataList().remap();
 			Main.project.addOrReplace(dl);
 			Optional<TableData> od = dl.stream().filter(d->d.getTable().getName().compareTo(name) == 0).findFirst();
 			if (od.isPresent()){

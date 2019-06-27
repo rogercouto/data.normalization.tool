@@ -1,6 +1,7 @@
 package dmt.model.data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -127,5 +128,15 @@ public class TableData implements Serializable, Cloneable {
 		this.loaded = loaded;
 	}
 
+	public void removeColumns(List<Column> columns){
+		List<Integer> indices = new ArrayList<>();
+		columns.forEach(column->{
+			int index = table.getElementIndex(column.getName());
+			indices.add(index);
+		});
+		getRows().forEach(row->row.removeColumns(indices));
+		table.removeColumns(columns);
+
+	}
 
 }

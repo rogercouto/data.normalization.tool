@@ -4,16 +4,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Optional;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.XML;
 
 import dmt.model.Column;
 import dmt.model.Table;
 import dmt.model.data.RowData;
 import dmt.model.data.TableData;
-import dmt.normalization.Normalize;
 import dmt.tools.Util;
 
 /**
@@ -25,9 +25,12 @@ public class JSONReader {
 	private String content;
 	private boolean firstAsModel = true;
 	private boolean createSurrogateKeys = false;
+	private boolean xml = false;
 	
 	public JSONReader(String filePath) {
 		try {
+			if (Util.getExtension(filePath).toLowerCase().compareTo("xml") == 0)
+				xml = true;
 			content = new String ( Files.readAllBytes( Paths.get(filePath) ) );
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -51,9 +54,18 @@ public class JSONReader {
 	}
 
 	public String getContent() {
-		return content;
+		if (!xml)
+			return content;
+		else
+			return getStart(content).toString();
 	}
 	
+	private JSONObject getJsonObject(){
+		if (!xml)
+			return new JSONObject(content);
+		else
+			return getStart(content);
+	}
 	/**
 	 * Le um arquivo em JSon e recupera suas informacoes
 	 * @param parentTable: utilizada para recursao
@@ -63,7 +75,7 @@ public class JSONReader {
 	 */
 	private Table readTable(Table parentTable, JSONObject jsonObj){
 		if (jsonObj == null)
-			jsonObj = new JSONObject(content);
+			jsonObj = getJsonObject();
 		Table table = new Table();
 		Iterator<String> iterator = jsonObj.keys();
 		while (iterator.hasNext()){
@@ -115,8 +127,7 @@ public class JSONReader {
 		if (table.haveNestedTables())
 			System.err.println(String.format("Warning: Table %s have nested tables!", table.getName()));
 		TableData data = new TableData(table);
-		//ler o arquivo JSON
-		JSONObject jsonObj = new JSONObject(content);
+		JSONObject jsonObj = getJsonObject();
 		JSONArray jsonArray = null;
 		if (jsonObj.has(table.getName()))
 			jsonArray = jsonObj.getJSONArray(table.getName());
@@ -136,43 +147,31 @@ public class JSONReader {
 		return data;
 	}
 	
+	private static JSONObject getStart(String xmlContent){
+		JSONObject jsonObj = XML.toJSONObject(xmlContent);
+		Optional<String> key = jsonObj.keySet().stream().findFirst();
+		if (key.isPresent()){
+			Object object = jsonObj.get(key.get());
+			if (object.getClass().equals(JSONArray.class))
+				return jsonObj;
+			else
+				return jsonObj.getJSONObject(key.get());
+		}
+		return null;
+	}
+	
 	public static void main(String[] args) {
-		JSONReader reader = new JSONReader("data/exemplo2.json");
-		reader.setFirstAsModel(true);
-		//reader.createSurrogateKeys(true);
-		Table table = reader.readTable();
-		table.getColumn("CodProj").setPrimaryKey(true);
-		table.getSubtable("Emp").getColumn("CodEmp").setPrimaryKey(true);
-		System.out.println(table);
-		//System.out.println(table);
-		
-		List<TableData> data = Normalize.splitNestedData(table, reader.getContent());
-		data.forEach(td -> {
-			System.out.println(td.getTable());
-			System.out.println(td);
-		});
-		/*
-		
-		for (TableData tableData : data) {
-			Normalize.matchBestTypes(tableData);
-			System.out.println(tableData.getTable());
-			for (RowData row : tableData.getRows()) {
-				System.out.println(row);
-			}
+		try {
+			//String jsonFilePath = "data/test/pessoasJuridicas.json";
+			String xmlFilePath = "data/test/pessoasJuridicas.xml";
+			//String jsonContent = new String ( Files.readAllBytes( Paths.get(jsonFilePath) ) );
+			String xmlContent = new String ( Files.readAllBytes( Paths.get(xmlFilePath) ) );
+			//JSONObject jsonObject = new JSONObject(jsonContent);
+			JSONObject xmlObject = getStart(xmlContent);
+			System.out.println(xmlObject);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		
-		List<Table> nt = Normalize.splitNestedTables(table);
-		nt.forEach(System.out::println);
-		System.out.println(table);
-		TableData data = reader.readData();
-		System.out.println(data);
-		List<Column> l = Normalize.findPrimaryKeyCandidates(data);
-		for (Column column : l) {
-			column.setPrimaryKey(true);
-			System.out.println(column.getName());
-		}
-		System.out.println(data.getTable());
-		*/
 	}
 	
 }

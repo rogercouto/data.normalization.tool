@@ -28,7 +28,7 @@ public class DataList implements List<TableData>,Serializable,Cloneable {
 		add(data);
 	}
 
-	private void remap(){
+	public void remap(){
 		map = new HashMap<>();
 		list.forEach(d->{
 			map.put(d.getTable().getName(), list.indexOf(d));
@@ -190,13 +190,14 @@ public class DataList implements List<TableData>,Serializable,Cloneable {
 		if (index != null){
 			list.set(index, data);
 		}
+		remap();
 	}
-	
+
 	public boolean haveTable(Table table){
 		Integer index = map.get(table.getName());
 		return index != null;
 	}
-	
+
 	@Override
 	public DataList clone(){
 		DataList newDL = new DataList();
@@ -215,5 +216,13 @@ public class DataList implements List<TableData>,Serializable,Cloneable {
 		});
 		return newDL;
 	}
-	
+
+	public TableData getData(String tableName){
+		int index = map.get(tableName);
+		if (index >= 0){
+			return list.get(index);
+		}
+		return null;
+	}
+
 }

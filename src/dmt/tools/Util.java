@@ -230,6 +230,13 @@ public class Util {
 		return builder.toString();
 	}
 	
+	public static String getExtension(String fileName){
+		String[] s = fileName.split("[.]");
+		if (s.length > 0)
+			return s[s.length-1];
+		return null;	
+	}
+	
 	public static void main(String[] args) {
 		//String t = "C:\\Users\\roger\\Dropbox\\ArquivosSI\\TCC\\data.normalization.tool\\data\\exemplo1.csv";
 		//System.out.println(getTableName(t));

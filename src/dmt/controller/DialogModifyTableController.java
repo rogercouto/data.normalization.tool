@@ -1,7 +1,6 @@
 package dmt.controller;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -21,6 +20,7 @@ import dmt.model.Column;
 import dmt.model.Table;
 import dmt.model.data.TableData;
 import dmt.normalization.Normalize;
+import dmt.normalization.Preprocess;
 import dmt.view.DialogModifyTable;
 
 public class DialogModifyTableController extends DialogModifyTable{
@@ -34,6 +34,7 @@ public class DialogModifyTableController extends DialogModifyTable{
 
 	public DialogModifyTableController(Shell parent, TableData data) {
 		super(parent);
+		result = false;
 		this.data = data;
 		initTable();
 	}
@@ -68,7 +69,7 @@ public class DialogModifyTableController extends DialogModifyTable{
 			Class<?> bm = Normalize.getBestMatchType(data, c.getName());
 			TableEditor editor1 = new TableEditor(tblModifier);
 			CCombo combo = new CCombo(tblModifier, SWT.READ_ONLY);
-			combo.setText(c.getType().getSimpleName());
+			//combo.setText(c.getType().getSimpleName());
 			combo.add("String");
 			if (!bm.equals(String.class))
 				combo.add(bm.getSimpleName());
@@ -79,6 +80,7 @@ public class DialogModifyTableController extends DialogModifyTable{
 				combo.add(Double.class.getSimpleName());
 				combo.add(Number.class.getSimpleName());
 			}
+			combo.setText(c.getType().getSimpleName());
 			typeCombos.add(combo);
 			editor1.grabHorizontal = true;
 			editor1.setEditor(combo, item, 1);
@@ -92,27 +94,24 @@ public class DialogModifyTableController extends DialogModifyTable{
 	}
 
 	protected void dobtnOkwidgetSelected(SelectionEvent e) {
-		HashMap<String, Class<?>> map = new HashMap<>();
-		data.getTable().getColumns().forEach(c->{
-			int index = data.getTable().getElementIndex(c.getName());
-			String typeName = typeCombos.get(index).getText();
-			Optional<Class<?>> type = TYPES.stream().filter(t->t.getSimpleName().compareTo(typeName)==0).findFirst();
-			if (type.isPresent()){
-				map.put(c.getName(), type.get());
-			}
-		});
-		Normalize.changeTypes(data, map);
-		if (data.getTable().getName().compareTo(txtName.getText()) != 0 && txtName.getText().trim().length() > 0){
-			data.getTable().setName(txtName.getText());
+		String tableName = txtName.getText();
+		List<String> newColumnNames = new ArrayList<>();
+		for (int i = 0; i < nameTexts.size(); i++) {
+			newColumnNames.add(nameTexts.get(i).getText());
+		}
+		List<Class<?>> types = new ArrayList<>();
+		for (int i = 0; i < typeCombos.size(); i++) {
+			String type = typeCombos.get(i).getText();
+			Optional<Class<?>> op = TYPES.stream().filter(t->t.getSimpleName().compareTo(type)==0).findFirst();
+			types.add(op.isPresent()?op.get():String.class);
 		}
 		List<Column> remColumns = new ArrayList<>();
 		for (int i = 0; i < remChecks.size(); i++) {
 			if (remChecks.get(i).getSelection())
 				remColumns.add(data.getTable().getColumn(i));
 		}
-		if (remColumns.size() > 0)
-			data = Normalize.removeColumns(data, remColumns);
-		result = data;
+		Preprocess.editTable(data, tableName, newColumnNames, types, remColumns);
+		result = true;
 		shell.close();
 	}
 

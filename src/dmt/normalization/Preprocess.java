@@ -1,5 +1,9 @@
 package dmt.normalization;
 
+import java.util.HashMap;
+import java.util.List;
+
+import dmt.model.Column;
 import dmt.model.data.TableData;
 import dmt.tools.Options;
 
@@ -7,7 +11,7 @@ public class Preprocess {
 
 	public static final int CLUSTER_FIRST = 0;
 	public static final int CLUSTER_HIGGER = 1;
-	
+
 	public static void clusterize(TableData data, String columnName, Cluster cluster, int method){
 		data.getRows().forEach(r->{
 			String oldValue = r.getValue(columnName).toString();
@@ -27,7 +31,7 @@ public class Preprocess {
 				r.setValue(columnName, newValue);
 		});
 	}
-	
+
 	public static String upperFirst(String string, boolean ignoreShortStrings){
 		char[] ca = string.toCharArray();
 		StringBuilder builder = new StringBuilder();
@@ -64,9 +68,49 @@ public class Preprocess {
 		}
 		return builder.reverse().toString();
 	}
-	
+
+	public static void changeTypes(TableData data, List<Class<?>> types){
+		List<Column> columns = data.getTable().getColumns();
+		if (columns.size() == types.size()){
+			columns.forEach(column->{
+				Class<?> type = types.get(columns.indexOf(column));
+				column.setType(type);
+		        for (int i = 0; i < data.getRowCount(); i++) {
+		            Object newValue = TypeMatch.convert(data.getRow(i).getValue(column.getName()), type);
+		            data.getRow(i).setValue(column.getName(), newValue);
+		        }
+			});
+		}
+	}
+
+	public static HashMap<String, String> editTable(TableData data, String tableName, List<String> newColumnNames, List<Class<?>> types, List<Column> remColumns){
+		HashMap<String, String> map = new HashMap<>();
+		String oldName = data.getTable().getName();
+		if (tableName.compareTo(oldName) != 0){
+			data.getTable().setName(tableName);
+		}
+		for (int i = 0; i < newColumnNames.size(); i++) {
+			String oldColumnName = data.getTable().getColumn(i).getName();
+			String newColumnName = newColumnNames.get(i);
+			if (oldColumnName.compareTo(newColumnName) != 0){
+				map.put(oldColumnName, newColumnName);
+				data.getTable().setElementName(oldColumnName, newColumnName);
+			}
+		}
+		changeTypes(data, types);
+		/*
+		data.getTable().getColumns().forEach(column->{
+			Normalize.changeType(data, column.getName(), types.get(data.getTable().getElementIndex(column.getName())));
+		});
+		*/
+		if (remColumns.size() > 0){
+			data.removeColumns(remColumns);
+		}
+		return map;
+	}
+
 	public static void main(String[] args) {
 		System.out.println(upperFirst("rOasTeds di cOld", false));
 	}
-	
+
 }

@@ -187,7 +187,14 @@ public class FDMapper {
 			});
 		});
 		return
-		res.entrySet().stream()
+		res.entrySet()
+		.stream()
+		.filter(fd->{
+			int size = fd.getValue().getOriSet().size()+fd.getValue().getDestSet().size();
+			if (data.getTable().getColumns().size()==size+1)
+				return false;
+			return true;
+		})
 	    .sorted((e1,e2)->(new Integer(e1. getValue().getDestSet().size()).compareTo(new Integer(e2.getValue().getDestSet().size())))*-1)
 	    .map(r->r.getValue())
 	    .collect(Collectors.toList());

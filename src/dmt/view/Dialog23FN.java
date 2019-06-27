@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Spinner;
 import dmt.controller.CompModelEditorController;
 import dmt.tools.Util;
 import org.eclipse.swt.widgets.ProgressBar;
+import org.eclipse.swt.widgets.Text;
 
 public class Dialog23FN extends Dialog {
 
@@ -58,6 +59,8 @@ public class Dialog23FN extends Dialog {
 	protected Spinner spnTolerance;
 	protected Label label;
 	protected ProgressBar progressBar;
+	protected Label lblNewTableName;
+	protected Text txtNewTableName;
 
 	/**
 	 * Create the dialog.
@@ -91,7 +94,7 @@ public class Dialog23FN extends Dialog {
 	 */
 	private void createContents() {
 		shell = new Shell(getParent(), getStyle());
-		shell.setSize(746, 443);
+		shell.setSize(812, 443);
 		shell.setText("3FN Normalization");
 		shell.setLayout(new GridLayout(2, false));
 		tabFolder = new CTabFolder(shell, SWT.BORDER);
@@ -192,9 +195,10 @@ public class Dialog23FN extends Dialog {
 		label.setText("%");
 		grpDependences = new Group(composite_1, SWT.NONE);
 		grpDependences.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		grpDependences.setLayout(new GridLayout(1, false));
+		grpDependences.setLayout(new GridLayout(2, false));
 		grpDependences.setText("Dependences");
 		btnSearch = new Button(grpDependences, SWT.NONE);
+		btnSearch.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		btnSearch.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -206,7 +210,18 @@ public class Dialog23FN extends Dialog {
 		progressBar.setVisible(false);
 		progressBar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		lstFD = new List(grpDependences, SWT.BORDER | SWT.V_SCROLL);
-		lstFD.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		lstFD.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				dolstFDwidgetSelected(e);
+			}
+		});
+		lstFD.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 2));
+		lblNewTableName = new Label(grpDependences, SWT.NONE);
+		lblNewTableName.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblNewTableName.setText("New table name:");
+		txtNewTableName = new Text(grpDependences, SWT.BORDER);
+		txtNewTableName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		btnPreview = new Button(grpDependences, SWT.NONE);
 		btnPreview.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -214,12 +229,12 @@ public class Dialog23FN extends Dialog {
 				dobtnNormalizewidgetSelected(e);
 			}
 		});
-		GridData gd_btnPreview = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1);
+		GridData gd_btnPreview = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1);
 		gd_btnPreview.widthHint = 100;
 		btnPreview.setLayoutData(gd_btnPreview);
 		btnPreview.setText("Preview");
 	}
-	
+
 	protected void createPreview(){
 		if (tbtmPreview == null){
 			tbtmPreview = new CTabItem(tabFolder, SWT.NONE);
@@ -232,7 +247,9 @@ public class Dialog23FN extends Dialog {
 			lblNewLabel_1 = new Label(composite_2, SWT.NONE);
 			lblNewLabel_1.setText("Refactor");
 			modelBefore = new CompModelEditorController(composite_2, SWT.BORDER);
-			modelBefore.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+			GridData gd_modelBefore = new GridData(SWT.FILL, SWT.FILL, false, true, 1, 1);
+			gd_modelBefore.widthHint = 250;
+			modelBefore.setLayoutData(gd_modelBefore);
 			modelAfter = new CompModelEditorController(composite_2, SWT.BORDER);
 			modelAfter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 			new Label(composite_2, SWT.NONE);
@@ -247,7 +264,7 @@ public class Dialog23FN extends Dialog {
 			});
 		}
 	}
-	
+
 	protected void dobtnAddwidgetSelected(SelectionEvent e) {
 	}
 	protected void dobtnAddAllwidgetSelected(SelectionEvent e) {
@@ -263,5 +280,7 @@ public class Dialog23FN extends Dialog {
 	protected void dobtnNormalizewidgetSelected(SelectionEvent e) {
 	}
 	protected void dobtnConfirmChangeswidgetSelected(SelectionEvent e) {
+	}
+	protected void dolstFDwidgetSelected(SelectionEvent e) {
 	}
 }

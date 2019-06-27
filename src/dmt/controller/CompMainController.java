@@ -1,11 +1,15 @@
 package dmt.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
@@ -18,91 +22,131 @@ import dmt.view.CompMain;
 
 public class CompMainController extends CompMain {
 
-	private HashMap<String, TableData> map;
-	private HashMap<String, Integer> openMap = new HashMap<>();
+    private HashMap<String, TableData> map;
+    private HashMap<String, Integer> openMap = new HashMap<>();
 
-	public CompMainController(Composite parent, int style) {
-		super(parent, style);
-		initialize();
-	}
+    public CompMainController(Composite parent, int style) {
+        super(parent, style);
+        initialize();
+    }
 
-	private void initialize(){
-		modelEditor.setDoubleClickListener(new Listener() {
-			@Override
-			public void handleEvent(Event arg0) {
-				Table table = (Table)arg0.data;
-				int mIndex = modelEditor.getTableIndex(table.getName());
-				if (openMap.containsKey(table.getName())){
-					int index = openMap.get(table.getName()).intValue();
-					tabFolder.setSelection(index);
-				}else{
-					TableData data = map.get(table.getName());
-					if (!data.isLoaded() && Main.project.getServer() != null){
-						ReverseEng re = new ReverseEng(Main.project.getServer());
-						re.fillData(data);
-					}
-					CompDataEditorController controller = new CompDataEditorController(tabFolder, SWT.NONE);
-					controller.setData(data);
-					controller.setEditTableListener(new Listener() {
-						@Override
-						public void handleEvent(Event arg0) {
-							TableData newData = (TableData)arg0.data;
-							Main.project.addOrReplace(newData.clone());
-							//Main.project.getDataList().replace(newData);
-							CTabItem item = tabFolder.getSelection();
-							item.setText(newData.getTable().getName());
-							map.remove(table.getName());
-							map.put(newData.getTable().getName(), newData);
-							int index = tabFolder.indexOf(item);
-							openMap.remove(table.getName());
-							openMap.put(newData.getTable().getName(), index);
-							modelEditor.setTable(mIndex, newData.getTable());
-							modelEditor.redraw();
-						}
-					});
-					controller.setNormalizeListener(new Listener() {
-						@Override
-						public void handleEvent(Event arg0) {
-							setDataList(Main.project.getDataList());
-						}
-					});
-					CTabItem item = new CTabItem(tabFolder, SWT.CLOSE);
-					item.setData(table.getName());
-					item.setText(table.getName());
-					item.setControl(controller);
-					item.addDisposeListener(new DisposeListener() {
-						@Override
-						public void widgetDisposed(DisposeEvent arg0) {
-							openMap.remove(table.getName());
-						}
-					});
-					tabFolder.setSelection(item);
-					openMap.put(table.getName(), tabFolder.indexOf(item));
-				}
-			}
+    private void initialize(){
+        modelEditor.setShowNF(true);
+        modelEditor.setDoubleClickListener(new Listener() {
+            @Override
+            public void handleEvent(Event arg0) {
+                Table table = (Table)arg0.data;
+                int mIndex = modelEditor.getTableIndex(table.getName());
+                if (openMap.containsKey(table.getName())){
+                    int index = openMap.get(table.getName()).intValue();
+                    tabFolder.setSelection(index);
+                }else{
+                    TableData data = map.get(table.getName());
+                    if (!data.isLoaded() && Main.project.getServer() != null){
+                        ReverseEng re = new ReverseEng(Main.project.getServer());
+                        re.fillData(data);
+                    }
+                    CompDataEditorController controller = new CompDataEditorController(tabFolder, SWT.NONE);
+                    controller.setData(data);
+                    controller.setEditTableListener(new Listener() {
+                        @Override
+                        public void handleEvent(Event arg0) {
+                            TableData newData = (TableData)arg0.data;
+                            if (newData != null){
+                            	CTabItem item = tabFolder.getSelection();
+                            	item.setText(newData.getTable().getName());
+                            	checkUnusedTableNames();
+                            	int index = tabFolder.indexOf(item);
+                            	openMap.remove(table.getName());
+                                openMap.put(newData.getTable().getName(), index);
+                                map.put(newData.getTable().getName(), newData);
+                            }
+                        }
+                    });
+                    controller.setPreprocessListener(new Listener() {
+                        @Override
+                        public void handleEvent(Event arg0) {
+                            TableData newData = (TableData)arg0.data;
+                            Main.project.addOrReplace(newData.clone());
+                            //Main.project.getDataList().replace(newData);
+                            CTabItem item = tabFolder.getSelection();
+                            item.setText(newData.getTable().getName());
+                            map.remove(table.getName());
+                            map.put(newData.getTable().getName(), newData);
+                            int index = tabFolder.indexOf(item);
+                            openMap.remove(table.getName());
+                            openMap.put(newData.getTable().getName(), index);
+                            modelEditor.setTable(mIndex, newData.getTable());
+                            modelEditor.redraw();
+                        }
+                    });
+                    controller.setNormalizeListener(new Listener() {
+                        @Override
+                        public void handleEvent(Event arg0) {
+                            setDataList(Main.project.getDataList());
+                        }
+                    });
+                    CTabItem item = new CTabItem(tabFolder, SWT.CLOSE);
+                    item.setData(table.getName());
+                    item.setText(table.getName());
+                    item.setControl(controller);
+                    item.addDisposeListener(new DisposeListener() {
+                        @Override
+                        public void widgetDisposed(DisposeEvent arg0) {
+                            openMap.remove(table.getName());
+                        }
+                    });
+                    tabFolder.setSelection(item);
+                    openMap.put(table.getName(), tabFolder.indexOf(item));
+                }
+            }
+        });
+    }
+
+    public void checkUnusedTableNames(){
+		List<String> names = new ArrayList<>();
+		List<String> usedNames = Main.project.getDataList()
+											.stream()
+											.map(dl->dl.getTable().getName())
+											.collect(Collectors.toList());
+		map.keySet().forEach(tn->{
+			if (!usedNames.contains(tn))
+				names.add(tn);
 		});
-	}
-
-	public void setDataList(DataList list){
-		map = new HashMap<>();
-		list.forEach(d->{
-			map.put(d.getTable().getName(), d);
+		names.forEach(name->{
+			map.remove(name);
 		});
-		reload();
+
 	}
 
-	public void setData(TableData data){
-		map = new HashMap<>();
-		map.put(data.getTable().getName(), data);
-		reload();
-	}
+    public void setDataList(DataList list){
+        map = new HashMap<>();
+        list.forEach(d->{
+            map.put(d.getTable().getName(), d);
+        });
+        reload();
+    }
 
-	private void reload(){
-		modelEditor.clear();
-		map.values().forEach(d->{
-			modelEditor.addTable(d.getTable());
-		});
-		modelEditor.calcPositions();
-	}
+    public void setData(TableData data){
+        map = new HashMap<>();
+        map.put(data.getTable().getName(), data);
+        reload();
+    }
+
+    private void reload(){
+        modelEditor.clear();
+        map.values().forEach(d->{
+            modelEditor.addTable(d.getTable());
+        });
+        modelEditor.calcPositions();
+    }
+
+    protected void dotltmCheckFkswidgetSelected(SelectionEvent e) {
+        DataList dl =  Main.project.getDataList();
+        dl.forEach(d->{
+        	System.out.println(d.getTable());
+        });
+
+    }
 
 }

@@ -14,6 +14,10 @@ import org.eclipse.swt.widgets.Shell;
 
 import dmt.controller.CompModelEditorController;
 import dmt.tools.Util;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.widgets.List;
 
 public class Dialog1FN extends Dialog {
 
@@ -33,6 +37,12 @@ public class Dialog1FN extends Dialog {
 	protected Button chk3;
 	protected Button chk4;
 	protected Button chk5;
+	protected Label lblNewTableName;
+	protected Text txtNewTableName;
+	protected Label lblColumn;
+	protected List lstColumn;
+	protected Label lblActual;
+	protected Label lblRefatored;
 
 	/**
 	 * Create the dialog.
@@ -66,12 +76,12 @@ public class Dialog1FN extends Dialog {
 	 */
 	private void createContents() {
 		shell = new Shell(getParent(), getStyle());
-		shell.setSize(559, 365);
+		shell.setSize(720, 480);
 		shell.setText("1FN Normalization");
 		shell.setLayout(new GridLayout(2, false));
 		composite = new Composite(shell, SWT.NONE);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		composite.setLayout(new GridLayout(3, false));
+		composite.setLayout(new GridLayout(5, false));
 		lblSeparators = new Label(composite, SWT.NONE);
 		lblSeparators.setText("Separators:");
 		composite_1 = new Composite(composite, SWT.NONE);
@@ -119,6 +129,22 @@ public class Dialog1FN extends Dialog {
 			}
 		});
 		chk5.setText(".");
+		new Label(composite, SWT.NONE);
+		new Label(composite, SWT.NONE);
+		lblColumn = new Label(composite, SWT.NONE);
+		lblColumn.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false, 1, 1));
+		lblColumn.setText("Column:");
+		lstColumn = new List(composite, SWT.BORDER | SWT.V_SCROLL);
+		lstColumn.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				dolstColumnwidgetSelected(e);
+			}
+		});
+		GridData gd_lstColumn = new GridData(SWT.LEFT, SWT.FILL, false, true, 4, 1);
+		gd_lstColumn.widthHint = 150;
+		gd_lstColumn.heightHint = 80;
+		lstColumn.setLayoutData(gd_lstColumn);
 		lblMethod = new Label(composite, SWT.NONE);
 		lblMethod.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblMethod.setText("Method:");
@@ -137,11 +163,24 @@ public class Dialog1FN extends Dialog {
 				dochkMultiwidgetSelected(e);
 			}
 		});
-		chkMulti.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
 		chkMulti.setText("Multi table");
+		lblNewTableName = new Label(composite, SWT.NONE);
+		lblNewTableName.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblNewTableName.setText("New table name: ");
+		txtNewTableName = new Text(composite, SWT.BORDER);
+		txtNewTableName.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent arg0) {
+				dotxtNewTableNamemodifyText(arg0);
+			}
+		});
+		txtNewTableName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		lblActual = new Label(shell, SWT.NONE);
+		lblActual.setText("Actual");
+		lblRefatored = new Label(shell, SWT.NONE);
+		lblRefatored.setText("Refator");
 		modelEditor1 = new CompModelEditorController(shell, SWT.BORDER, SWT.NONE);
 		GridData gd_modelEditor1 = new GridData(SWT.LEFT, SWT.FILL, false, false, 1, 1);
-		gd_modelEditor1.widthHint = 200;
+		gd_modelEditor1.widthHint = 250;
 		modelEditor1.setLayoutData(gd_modelEditor1);
 		modelEditor2 = new CompModelEditorController(shell, SWT.BORDER, SWT.NONE);
 		modelEditor2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
@@ -154,7 +193,7 @@ public class Dialog1FN extends Dialog {
 		});
 		btnConfirm.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1));
 		btnConfirm.setText("Confirm");
-
+		txtNewTableName.setEnabled(false);
 	}
 	protected void docheckSinglewidgetSelected(SelectionEvent e) {
 	}
@@ -163,33 +202,40 @@ public class Dialog1FN extends Dialog {
 	protected void dobtnConfirmwidgetSelected(SelectionEvent e) {
 	}
 	protected void dochk1widgetSelected(SelectionEvent e) {
+		check();
 		refresh();
 	}
 	protected void dochk2widgetSelected(SelectionEvent e) {
+		check();
 		refresh();
 	}
 	protected void dochk3widgetSelected(SelectionEvent e) {
+		check();
 		refresh();
 	}
 	protected void dochk4widgetSelected(SelectionEvent e) {
+		check();
 		refresh();
 	}
 	protected void dochk5widgetSelected(SelectionEvent e) {
+		check();
 		refresh();
 	}
 	
-	protected void refresh(){
-		
+	protected void check(){
 	}
 	
+	protected void refresh(){
+	}
+
 	public void setSeparators(char[] ca){
-		chk1.setSelection(Util.contains(ca, ';'));		
+		chk1.setSelection(Util.contains(ca, ';'));
 		chk2.setSelection(Util.contains(ca, '\n'));
 		chk3.setSelection(Util.contains(ca, ','));
 		chk4.setSelection(Util.contains(ca, ' '));
 		chk5.setSelection(Util.contains(ca, '.'));
 	}
-	
+
 	public char[] getSeparators(){
 		StringBuilder builder = new StringBuilder();
 		if (chk1.getSelection())
@@ -203,5 +249,10 @@ public class Dialog1FN extends Dialog {
 		if (chk5.getSelection())
 			builder.append('.');
 		return builder.toString().toCharArray();
+	}
+	protected void dotxtNewTableNamemodifyText(ModifyEvent arg0) {
+		refresh();
+	}
+	protected void dolstColumnwidgetSelected(SelectionEvent e) {
 	}
 }

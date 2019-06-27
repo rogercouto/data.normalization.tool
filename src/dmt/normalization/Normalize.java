@@ -12,17 +12,15 @@ import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import dmt.input.CSVReader;
-import dmt.input.JSONReader;
 import dmt.model.Column;
 import dmt.model.Element;
 import dmt.model.Table;
+import dmt.model.data.NormalForm;
 import dmt.model.data.RowData;
 import dmt.model.data.TableData;
 import dmt.model.project.DataList;
 import dmt.normalization.fd.FD;
 import dmt.normalization.fd.FDMapper;
-import dmt.tools.Benchmark;
 import dmt.tools.IntCounter;
 import dmt.tools.Options;
 import dmt.tools.Util;
@@ -245,12 +243,6 @@ public class Normalize {
                         	Object value = row.getValue(nTable.getSurrogateKey().getName());
                         	pkMap.put(nTable.getSurrogateKey().getName(), value);
                         }
-                        /*
-                        for (Column column : nTable.getSurrogateKeys()) {
-                            Object value = row.getValue(column.getName());
-                            pkMap.put(column.getName(), value);
-                        }
-                        */
                         splitSubdata(subTable, nSubTable, nTableMap, jsonSubArray, pkMap, dataMap);
                     }
                 }else{
@@ -267,14 +259,9 @@ public class Normalize {
     }
 
     public static DataList splitNestedData(Table table, String content){
-        //Primeiro passo normalizar a tabela
-        if (!table.haveNestedTables())
-            throw new RuntimeException(
-                    String.format("Normalize.splitNestedData: table %s dont have nested table", table.getName()));
         if (!table.havePrimaryKey())
             table.createSurrogateKey();
         List<Table> nTables = splitNestedTables(table);
-        //HashMap<String, Table> nTableMap = splitNestedTablesToHash(table);
         HashMap<String, Table> nTableMap = toHash(nTables);
         HashMap<String, TableData> dataMap = new HashMap<>();
         //Segundo passo ler o arquivo json
@@ -292,8 +279,6 @@ public class Normalize {
             }
             for (int i = 0; i < jsonArray.length(); i++) {
                 RowData row = dataMap.get(nTable.getName()).createRow();
-                //RowData row = new RowData(nTable);
-                //dataMap.get(nTable.getName()).addRow(row);
                 JSONObject jObj = jsonArray.getJSONObject(i);
                 for (Element element : table.getElements()){
                     if (element.getClass().equals(Table.class)){
@@ -310,12 +295,6 @@ public class Normalize {
                             	Object value = row.getValue(nTable.getSurrogateKey().getName());
                             	pkMap.put(nTable.getSurrogateKey().getName(), value);
                             }
-                            /*
-                            for (Column column : nTable.getSurrogateKeys()) {
-                                Object value = row.getValue(column.getName());
-                                pkMap.put(column.getName(), value);
-                            }
-                            */
                             splitSubdata(subTable, nSubTable, nTableMap, jsonSubArray, pkMap, dataMap);
                         }
                     }else{
@@ -330,7 +309,6 @@ public class Normalize {
                 }
             }
         }
-        //return dataMap.values().stream().collect(Collectors.toList());
         //Ordena na ordem correta
         DataList data = new DataList();
         for (Table nTable : nTables) {
@@ -527,12 +505,13 @@ public class Normalize {
      * @param columns: lista de colunas removidas da tabela original
      * @return tabelas refatoradas
      */
-    public static DataList splitColumnsToList(TableData data, List<Column> columns, char[] separators){
+    public static DataList splitColumnsToList(TableData data, List<Column> columns, char[] separators, String newColumnName){
         DataList list = new DataList();
         TableData data1 = removeColumns(data, columns);
         list.add(data1);
         for (Column column : columns) {
-            Table fkTable = new Table(Util.toSingular(column.getName()));
+        	String fkTableName = (newColumnName != null)? newColumnName : Util.toSingular(column.getName());
+            Table fkTable = new Table(fkTableName);
             if (data.getTable().haveSurrogateKey())
                 fkTable.createSurrogateKey();
             List<Column> parentKeys = data1.getTable().getPrimaryKeys();
@@ -575,9 +554,19 @@ public class Normalize {
 
     public static DataList splitColumnsToList(TableData data, char[] separators){
         List<Column> columns = findMultiValuedColumns(data, separators);
-        return splitColumnsToList(data, columns, separators);
+        return splitColumnsToList(data, columns, separators, null);
     }
 
+    public static DataList splitColumnsToList(TableData data, char[] separators, String newTableName){
+    	List<Column> columns = findMultiValuedColumns(data, separators);
+        return splitColumnsToList(data, columns, separators, newTableName);
+    }
+
+    public static DataList splitColumnToList(TableData data, char[] separators, Column column, String newTableName){
+    	List<Column> columns = new ArrayList<>();
+    	columns.add(column);
+    	return splitColumnsToList(data, columns, separators, newTableName);
+    }
     /**
      * Replica os registros de uma tabela em uncao de uma coluna multi-valorada
      * @param data
@@ -627,12 +616,14 @@ public class Normalize {
     	return data;
     }
 
+    public static TableData splitColumn(TableData data, char[] separators, Column column){
+    	return splitColumn(data, column, separators);
+    }
     /**
      * Procura pela melhor correspond�ncia de tipo para cada coluna
      * @param data dados
      * @return lista de tipos
      */
-    @Deprecated
     public static List<Class<?>> getBestMatchTypes(TableData data){
         List<Class<?>> types = new ArrayList<>();
         for (int i = 0; i < data.getTable().getElementCount(); i++) {
@@ -648,7 +639,6 @@ public class Normalize {
      * @param data
      * @param columns
      */
-    @Deprecated
     public static void matchBestTypes(TableData data, int[] columns){
         if (columns == null){
             columns = new int[data.getTable().getElementCount()];
@@ -732,115 +722,6 @@ public class Normalize {
 		}
     }
 
-    @Deprecated
-    public static boolean determine(TableData data, String cn1, String cn2, int editDistance, double perc){
-    	DependencyCounter counter = new DependencyCounter(editDistance);
-        for (RowData row : data.getRows()) {
-            Object v1 = row.getValue(cn1);
-            Object v2 = row.getValue(cn2);
-            counter.addValues(v1, v2);
-        }
-        double hit = counter.getMinDependencePerc();
-        return hit >= perc;
-    }
-
-    @Deprecated
-    public static boolean determineFast(TableData data, String cn1, String cn2){
-    	HashSet<String> valuesC1 = new HashSet<>();
-    	HashSet<String> valuesMix = new HashSet<>();
-    	for (RowData row : data.getRows()) {
-            String v1 = row.getValue(cn1) != null ? row.getValue(cn1).toString() : null;
-            String v2 = row.getValue(cn2) != null ? row.getValue(cn2).toString() : null;
-            valuesC1.add(v1);
-            if (v1 != null && v2 != null)
-            	valuesMix.add(v1.concat(v2));
-        }
-    	return valuesC1.size() == valuesMix.size();
-    }
-
-    @Deprecated
-    public static HashSet<Column> getDependencies(TableData data, String columnName, int editDistance, double perc){
-        final boolean ignorePks = (data.getTable().getPrimaryKeys().size() == 1);
-        List<Column> oc = data.getTable()
-                .getColumns()
-                .stream()
-                .filter(c -> {
-                    if (c.isPrimaryKey() && ignorePks)
-                        return false;
-                    return (c.getName().compareTo(columnName) != 0);
-                })
-                .collect(Collectors.toList());
-        HashSet<Column> dependences = new HashSet<>();
-        for (Column column : oc) {
-            if (determine(data, columnName, column.getName(), editDistance, perc)){
-                dependences.add(column);
-            }
-        }
-        return dependences;
-    }
-
-    @Deprecated
-    public static HashSet<Column> getDependenciesFast(TableData data, String columnName){
-        final boolean ignorePks = (data.getTable().getPrimaryKeys().size() == 1);
-        List<Column> oc = data.getTable()
-                .getColumns()
-                .stream()
-                .filter(c -> {
-                    if (c.isPrimaryKey() && ignorePks)
-                        return false;
-                    return (c.getName().compareTo(columnName) != 0);
-                })
-                .collect(Collectors.toList());
-        HashSet<Column> dependences = new HashSet<>();
-        for (Column column : oc) {
-            if (determineFast(data, columnName, column.getName())){
-                dependences.add(column);
-            }
-        }
-        return dependences;
-    }
-
-    @Deprecated
-    public static HashMap<String, HashSet<Column>> getAllDependencies(TableData data, int editDistance, double perc){
-    	final int numPks = data.getTable().getPrimaryKeys().size();
-    	HashMap<String, HashSet<Column>> map = new HashMap<>();
-    	List<Column> columns = data.getTable().getColumns()
-    			.stream()
-    			.filter(c -> {
-    				if (c.isPrimaryKey() && numPks == 1)
-    					return false;
-    				if (!c.isPrimaryKey() && c.isUnique())
-    					return false;
-    				return true;
-    			})
-    			.collect(Collectors.toList());
-        columns.stream().forEach(column->{
-        	HashSet<Column> set = getDependencies(data, column.getName(), editDistance, perc);
-            map.put(column.getName(), set);
-        });
-        return map;
-    }
-
-    @Deprecated
-    public static HashMap<String, HashSet<Column>> getAllDependenciesFast(TableData data){
-    	final int numPks = data.getTable().getPrimaryKeys().size();
-    	HashMap<String, HashSet<Column>> map = new HashMap<>();
-    	List<Column> columns = data.getTable().getColumns()
-    			.stream()
-    			.filter(c -> {
-    				if (c.isPrimaryKey() && numPks == 1)
-    					return false;
-    				if (!c.isPrimaryKey() && c.isUnique())
-    					return false;
-    				return true;
-    			})
-    			.collect(Collectors.toList());
-        for (Column column : columns) {
-            HashSet<Column> set = getDependenciesFast(data, column.getName());
-            map.put(column.getName(), set);
-        }
-        return map;
-    }
 
     public static void printDependences(HashMap<String, HashSet<Column>> deps){
         StringBuilder builder = new StringBuilder();
@@ -908,50 +789,6 @@ public class Normalize {
     	return list;
     }
 
-    public static DataList splitDependences(TableData data, String columnName, FD fd){
-    	List<Column> deps = new ArrayList<>();
-    	fd.getOriSet().forEach(colName->{
-    		deps.add(data.getTable().getColumn(colName));
-    	});
-    	fd.getDestSet().forEach(colName->{
-    		deps.add(data.getTable().getColumn(colName));
-    	});
-    	Table table0 = new Table(data.getTable().getName());
-    	for (Column column : data.getTable().getColumns()) {
-    		if (!deps.contains(column))
-				table0.addColumn(column.clone());
-		}
-    	Table table1 = new Table(columnName);
-    	Column t1Pk = table0.getColumn(columnName).clone();
-    	t1Pk.setPrimaryKey(true);
-    	table1.addColumn(t1Pk);
-    	for (Column column : deps) {
-    		table1.addColumn(column);
-		}
-    	table0.getColumn(columnName).setForeignKey(table1.getColumn(columnName));
-    	TableData dt0 = new TableData(table0);
-    	TableData dt1 = new TableData(table1);
-    	HashSet<Object> t2pks = new HashSet<>();
-    	for (RowData row : data.getRows()) {
-    		RowData r0 = dt0.createRow();
-    		for (Column column : table0.getColumns()) {
-				r0.setValue(column.getName(), row.getValue(column.getName()));
-			}
-    		Object pk = row.getValue(columnName);
-    		if (!t2pks.contains(pk)){
-    			t2pks.add(pk);
-    			RowData r1 = dt1.createRow();
-    			for (Column column : table1.getColumns()) {
-					r1.setValue(column.getName(), row.getValue(column.getName()));
-				}
-    		}
-		}
-    	DataList list = new DataList();
-    	list.add(dt0);
-    	list.add(dt1);
-    	return list;
-    }
-    
     public static String combineValues(RowData row,FD fd){
     	Set<String> set = new TreeSet<>();
 		set.addAll(fd.getOriSet());
@@ -964,12 +801,11 @@ public class Normalize {
     	});
     	return builder.toString();
     }
-    
-    public static DataList splitDependences(TableData data, FD fd){
+
+    public static DataList splitDependences(TableData data, FD fd, String newTableName){
     	DataList dl = new DataList();
     	//Create sub table
-    	String firstCol = fd.getFirstDet();
-    	Table fkTable = new Table(firstCol);
+    	Table fkTable = new Table(newTableName);
     	fkTable.createSurrogateKey();
     	//Create list with all FD columns
     	List<String> fdCNs = new LinkedList<>();
@@ -995,7 +831,7 @@ public class Normalize {
     	TableData rData = new TableData(rTable);
     	HashMap<String, Object> fHash = new HashMap<>();
     	data.getRows().forEach(row->{
-    		String combinatedValue = combineValues(row, fd); 
+    		String combinatedValue = combineValues(row, fd);
     		if (!fHash.containsKey(combinatedValue)){
     			RowData fkRow = new RowData(fkTable);
     			fkTable.getColumns().forEach(fkColumn->{
@@ -1014,180 +850,104 @@ public class Normalize {
     		}
     		rData.addRow(rRow);
     	});
+    	checkNormalForm(rData);
+    	checkNormalForm(fkData);
     	dl.add(rData);
     	dl.add(fkData);
     	return dl;
     }
-    
-    public static void main(String[] args) {
-        test7();
+
+    public static TableData splitColumn(TableData data, String columnName, String cn1, String cn2, List<String> c1Values, List<String> c2Values){
+    	Column originalColumn = data.getTable().getColumn(columnName);
+    	if (originalColumn != null){
+	    	Table newTable = new Table(data.getTable().getName());
+	    	data.getTable().getColumns().forEach(column->{
+	    		if (column.getName().compareTo(originalColumn.getName()) == 0){
+	    			Column c1 = originalColumn.clone();
+	    			c1.setName(cn1);
+	    			newTable.addColumn(c1);
+	    			Column c2 = new Column(cn2);
+	    			c2.setType(String.class);
+	    			newTable.addColumn(c2);
+	    		}else{
+	    			newTable.addColumn(column.clone());
+	    		}
+	    	});
+	    	IntCounter ic = new IntCounter();
+	    	TableData newData = new TableData(newTable);
+	    	data.getRows().forEach(row->{
+	    		RowData newRow = new RowData(newTable);
+	    		data.getTable().getColumns()
+					.stream()
+					.filter(c->c.getName().compareTo(originalColumn.getName()) != 0)
+					.forEach(c->{
+						newRow.setValue(c.getName(), row.getValue(c.getName()));
+					});
+	    		newRow.setValue(cn1, c1Values.get(ic.getValue()).trim());
+	    		newRow.setValue(cn2, c2Values.get(ic.getValue()).trim());
+	    		ic.inc();
+	    		newData.addRow(newRow);
+	    	});
+	    	return newData;
+    	}
+    	return null;
     }
 
-    public static void test1(){
-    	Benchmark benchmark = new Benchmark();
-        CSVReader reader = new CSVReader("data/exemplo1.csv");
-        TableData data = reader.getData(';','"');
-
-        Normalize.matchBestTypes(data);
-        Normalize.setStringSizes(data, 0);
-        List<Column> pkList = Normalize.findPrimaryKeyCandidates(data);
-        pkList.forEach(key->{
-        	if (key.getType().equals(Integer.class))
-        		key.setPrimaryKey(true);
-        });
-        List<Column> uList = Normalize.findUniqueColumns(data);
-        uList.forEach(c->{
-        	if (!c.isPrimaryKey())
-        		c.setUnique(true);
-        });
-        System.out.println(data.getTable());
-        int editDistance = 1;
-        double perc = 1.0; //100%
-        HashMap<String, HashSet<Column>> deps = getAllDependencies(data, editDistance, perc);
-        printDependences(deps);
-        DataList nd = splitDependences(data, "Cat", deps.get("Cat"));
-        nd.forEach(d->{
-        	System.out.println(d.getTable());
-        	System.out.println(d);
-        });
-        benchmark.stop(true);
+    public static TableData mixColumns(TableData data, String cn1, String cn2, String newColumnName, String divisor, boolean keepOriginalColumns){
+    	Table newTable = new Table(data.getTable().getName());
+    	data.getTable().getColumns().forEach(column->{
+    		if (column.getName().compareTo(cn1) != 0 && column.getName().compareTo(cn2) != 0){
+    			newTable.addColumn(column.clone());
+    		}else{
+    			if (keepOriginalColumns)
+    				newTable.addColumn(column.clone());
+    			if (column.getName().compareTo(cn2) == 0){
+    				Column newColumn = column.clone();
+	    			newColumn.setName(newColumnName);
+	    			newTable.addColumn(newColumn);
+    			}
+    		}
+    	});
+    	TableData newData = new TableData(newTable);
+    	data.getRows().forEach(row->{
+    		RowData newRow = new RowData(newTable);
+    		data.getTable().getColumns()
+	    		.stream()
+	    		.filter(column-> keepOriginalColumns||(column.getName().compareTo(cn1)!=0 && column.getName().compareTo(cn2)!=0))
+	    		.forEach(column->{
+	    			newRow.setValue(column.getName(), row.getValue(column.getName()));
+	    		});
+    		StringBuilder builder = new StringBuilder();
+    		Object value1 = row.getValue(cn1);
+    		if (value1 != null)
+    			builder.append(value1.toString());
+    		if (divisor != null)
+    			builder.append(divisor);
+    		Object value2 = row.getValue(cn2);
+    		if (value2 != null)
+    			builder.append(value2.toString());
+    		if (builder.length() > 0)
+    			newRow.setValue(newColumnName, builder.toString());
+    		newData.addRow(newRow);
+    	});
+    	return newData;
     }
 
-    public static void test2(){
-    	Benchmark benchmark = new Benchmark();
-        //CSVReader reader = new CSVReader("data/exemplo1.csv");
-    	CSVReader reader = new CSVReader("data/CADASTRO_MATRICULAS_REGIAO_SUL_2012.csv");
-    	reader.setColumnDescriptionsIndex(0);
-    	reader.setColumnNamesIndex(1);
-    	reader.createSurrogateKeys(true);
-    	String[][] sample = reader.getSample(';', '"',200);
-        TableData data = reader.getData(sample);
-        List<Column> pkList = Normalize.findPrimaryKeyCandidates(data);
-        pkList.forEach(key->{
-        	if (key.getType().equals(Integer.class))
-        		key.setPrimaryKey(true);
-        });
-        List<Column> uList = Normalize.findUniqueColumns(data);
-        uList.forEach(c->{
-        	if (!c.isPrimaryKey())
-        		c.setUnique(true);
-        });
-        Normalize.matchBestTypes(data);
-        getAllDependencies(data, 0, 1.0);
-        benchmark.stop(true);
-        benchmark.start();
-        getAllDependenciesFast(data);
-        benchmark.stop(true);
-    }
-
-    public static void test3(){
-    	Benchmark benchmark = new Benchmark();
-    	CSVReader reader = new CSVReader("data/CADASTRO_MATRICULAS_REGIAO_SUL_2012.csv");
-    	reader.setColumnNamesIndex(1);
-    	reader.setColumnDescriptionsIndex(0);
-    	String[][] sample = reader.getSample(';', '"', 100);
-        TableData sampleData = reader.getData(sample);
-        Normalize.matchBestTypes(sampleData);
-        Normalize.setStringSizes(sampleData, 0);
-        List<Column> pkList = Normalize.findPrimaryKeyCandidates(sampleData);
-        pkList.forEach(key->{
-        	if (key.getType().equals(Integer.class))
-        		key.setPrimaryKey(true);
-        });
-        List<Column> uList = Normalize.findUniqueColumns(sampleData);
-        uList.forEach(c->{
-        	if (!c.isPrimaryKey())
-        		c.setUnique(true);
-        });
-        int editDistance = 1;
-        double perc = 1.0; //100%
-        System.out.print("Configuration... ");
-        benchmark.stop(true);
-        System.out.print("Check dependencies... ");
-        benchmark.start();
-        HashMap<String, HashSet<Column>> deps = getAllDependencies(sampleData, editDistance, perc);
-        benchmark.stop(true);
-        String majorDet = getMajorDeterminant(deps);
-
-        System.out.println(getMajorDeterminant(deps));
-        DataList nd = splitDependences(sampleData, majorDet, deps.get(majorDet));
-        nd.forEach(d->{
-        	//System.out.println(d.getTable());
-        	//System.out.println(d);
-        });
-
-        /*
-        printDependences(deps);
-
-        System.out.println(deps.get("AGUA_CACIMBA"));
-        */
-    }
-
-    public static void test4(){
-    	CSVReader reader = new CSVReader("data/exemplo2.csv");
-        TableData data = reader.getData(';','"');
-        Normalize.matchBestTypes(data);
-        Normalize.setStringSizes(data, 0);
-        data.getTable().setName("Funcionario_Depto");
-        data.getTable().getColumn("CodFuncionario").setPrimaryKey(true);
-        data.getTable().getColumn("NumDepto").setPrimaryKey(true);
-        System.out.println(data.getTable());
-        int editDistance = 0;
-        double perc = 1.0; //100%
-
-        //boolean t = determine(data, "NumDepto", "HorasTrab", 0, 1.0);
-        //System.err.println(t);
-
-        HashMap<String, HashSet<Column>> deps = getAllDependencies(data, editDistance, perc);
-        printDependences(deps);
-
-        DataList datas = splitDependences(data, "NumDepto", deps.get("NumDepto"));
-        datas.forEach(d->{
-        	System.out.println(d.getTable());
-        	System.out.println(d);
-        });
-    }
-
-    public static void test5(){
-    	JSONReader reader = new JSONReader("data/exemplo3.json");
-    	reader.createSurrogateKeys(false);
-        TableData data = reader.readData();
-
-        Table table = data.getTable();
-        System.out.println(table);
-        Table table1FN = mixNestedTables(table);
-        System.out.println(table1FN);
-        TableData newData = mixNestedData(table, reader.getContent());
-        System.out.println(newData);
-    }
-
-    public static void test6(){
-    	CSVReader reader = new CSVReader("data/exemplo1.csv");
-        TableData data = reader.getData(';','"');
-        System.out.println(data);
-        TableData newData = splitColumns(data, new char[]{'\n'});
-        System.out.println();
-        System.out.println(newData.getTable());
-        System.out.println(newData);
-    }
-    
-    public static void test7(){
-    	CSVReader reader = new CSVReader("data/funcionario_dm.csv");
-        TableData data = reader.getData(';','"');
-        System.out.println(data);
-        FDMapper fdMapper = new FDMapper(data);
-        fdMapper.setMaxData(-1);
-        List<Column> columns = new LinkedList<>();
-        columns.add(data.getTable().getColumn("Cat"));
-        columns.add(data.getTable().getColumn("Nivel"));
-        columns.add(data.getTable().getColumn("Salario"));
-        fdMapper.setColumns(columns);
-        List<FD> fd = fdMapper.getFDs();
-        /*
-        fd.forEach(System.out::println);
-        System.out.println(fd.get(5).getFirstDet());
-        */
-        System.out.println(Normalize.splitDependences(data, fd.get(5)));
+    public static void checkNormalForm(TableData data){
+    	List<Column> mvc = findMultiValuedColumns(data, Options.getDefaultSeparators());
+    	if (mvc.size() > 0){
+    		data.setNormalForm(NormalForm.NN);
+    	}else{
+    		FDMapper mapper = new FDMapper(data);
+    		mapper.setMaxData(Options.getDefaultSampleSize());
+    		mapper.setMaxLevel(1);
+    		List<FD> fd = mapper.getFDs();
+    		if (fd.size() > 0){
+    			data.setNormalForm(NormalForm.NF2);
+    		}else{
+    			data.setNormalForm(NormalForm.NF3);
+    		}
+    	}
     }
 
 }

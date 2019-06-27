@@ -14,6 +14,7 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.wb.swt.SWTResourceManager;
+import org.eclipse.swt.widgets.Text;
 
 public class CompImportCSV extends Composite {
 
@@ -39,6 +40,8 @@ public class CompImportCSV extends Composite {
 	protected Link linkUnselectAll;
 	protected Label lblDataTypes;
 	protected Combo comboTypes;
+	protected Label lblTableName;
+	protected Text txtTableName;
 
 	/**
 	 * Create the composite.
@@ -52,6 +55,11 @@ public class CompImportCSV extends Composite {
 		grpImportOptions.setText("Import options");
 		grpImportOptions.setLayout(new GridLayout(4, false));
 		grpImportOptions.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		lblTableName = new Label(grpImportOptions, SWT.NONE);
+		lblTableName.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblTableName.setText("Table name:");
+		txtTableName = new Text(grpImportOptions, SWT.BORDER);
+		txtTableName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 		lblColumnNamesRow = new Label(grpImportOptions, SWT.NONE);
 		lblColumnNamesRow.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblColumnNamesRow.setBackground(SWTResourceManager.getColor(SWT.COLOR_GRAY));
@@ -119,7 +127,7 @@ public class CompImportCSV extends Composite {
 		comboTypes.add("Best match");
 		comboTypes.select(0);
 		comboTypes.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 3, 1));
-		
+
 		lblDataPreview = new Label(this, SWT.NONE);
 		lblDataPreview.setText("Data preview");
 		table = new Table(this, SWT.BORDER | SWT.FULL_SELECTION);

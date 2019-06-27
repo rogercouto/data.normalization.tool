@@ -1,14 +1,15 @@
 package dmt.view;
 
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Button;
-import dmt.controller.CompModelEditorController;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+
+import dmt.controller.CompModelEditorController;
 
 public class CompImportJSON extends Composite {
 	protected Composite composite;
@@ -51,7 +52,7 @@ public class CompImportJSON extends Composite {
 		btnSplit.setText("Split tables");
 		modelEditor1 = new CompModelEditorController(this, SWT.BORDER, SWT.NONE);
 		GridData gd_modelEditor1 = new GridData(SWT.FILL, SWT.FILL, false, true, 1, 1);
-		gd_modelEditor1.widthHint = 250;
+		gd_modelEditor1.widthHint = 220;
 		modelEditor1.setLayoutData(gd_modelEditor1);
 		modelEditor2 = new CompModelEditorController(this, SWT.BORDER, SWT.NONE);
 		modelEditor2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));

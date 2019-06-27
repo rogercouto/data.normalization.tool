@@ -55,10 +55,22 @@ public class Options {
 	public static int getShortStringLimit(){
 		return 2;
 	}
-	
+
 	@Deprecated
 	public static boolean paralelize(){
 		return true;
+	}
+
+	public static boolean testMode(){
+		return false;
+	}
+	
+	public static char[] getDefaultSeparators(){
+		return new char[]{'\n',';'};
+	}
+	
+	public static int getDefaultSampleSize(){
+		return 200;
 	}
 
 }

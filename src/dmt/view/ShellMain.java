@@ -143,7 +143,7 @@ public class ShellMain {
 				domntmJsonFilewidgetSelected(e);
 			}
 		});
-		mntmJsonFile.setText("JSON File...");
+		mntmJsonFile.setText("JSON/XML File...");
 		mntmDatabase = new MenuItem(menu_1, SWT.NONE);
 		mntmDatabase.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -194,8 +194,8 @@ public class ShellMain {
 				dobtnJsonwidgetSelected(e);
 			}
 		});
-		btnJson.setToolTipText("Import from JSON");
-		btnJson.setImage(SWTResourceManager.getImage(ShellMain.class, "/icon/json32.png"));
+		btnJson.setToolTipText("Import from JSON/XML");
+		btnJson.setImage(SWTResourceManager.getImage(ShellMain.class, "/icon/jsonxml32.png"));
 		btnDB = new ToolItem(toolBar_1, SWT.NONE);
 		btnDB.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -214,7 +214,7 @@ public class ShellMain {
 				dobtnSqlwidgetSelected(e);
 			}
 		});
-		btnExport.setToolTipText("Import From SGBD");
+		btnExport.setToolTipText("Export Data");
 		btnExport.setImage(SWTResourceManager.getImage(ShellMain.class, "/icon/export32.png"));
 		btnCsv.addSelectionListener(new SelectionAdapter() {
 			@Override

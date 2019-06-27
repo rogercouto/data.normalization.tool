@@ -29,11 +29,12 @@ public class CompModelEditorController extends CompModelEditor {
 
 	private static final int START_POS = 25;
 	private static final int SPC_BETWEEN = 20;
-	
+
 	public List<TableModel> models = new LinkedList<>();
 	private TableModel movingModel = null;
 	private Listener doubleClickListener = null;
 	private static int maxWidth = 1200;
+	private boolean showNF = false;
 
 	public CompModelEditorController(Composite parent, int style) {
 		super(parent, style);
@@ -54,7 +55,7 @@ public class CompModelEditorController extends CompModelEditor {
 	        		tm.drawRelations(e.gc, om, hSelection, vSelection);
 	        	});
 	        	models.forEach(tm->{
-	        		tm.draw(e.gc, hSelection, vSelection);
+	        		tm.draw(e.gc, hSelection, vSelection, showNF);
 	        	});
 	        }
 	    });
@@ -111,19 +112,19 @@ public class CompModelEditorController extends CompModelEditor {
 		TableModel tm = new TableModel(table, new Point(START_POS, START_POS));
 		models.add(tm);
 	}
-	
+
 	public void addTables(DataList dataList){
 		dataList.forEach(data->{
 			addTable(data.getTable());
 		});
 	}
-	
+
 	public void addTables(List<Table> tables){
 		tables.forEach(table->{
 			addTable(table);
 		});
 	}
-	
+
 	@Deprecated
 	public void addTableModel(TableModel tableModel){
 		models.add(tableModel);
@@ -186,6 +187,14 @@ public class CompModelEditorController extends CompModelEditor {
 
 	public static void setMaxWidth(int maxWidth) {
 		CompModelEditorController.maxWidth = maxWidth;
+	}
+
+	public boolean isShowNF() {
+		return showNF;
+	}
+
+	public void setShowNF(boolean showNF) {
+		this.showNF = showNF;
 	}
 
 	public void calcPositions(){

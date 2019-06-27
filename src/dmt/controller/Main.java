@@ -58,7 +58,7 @@ public class Main extends ShellMain {
 
 	private void importJSON(){
 		FileDialog dialog = new FileDialog(shell);
-		dialog.setFilterExtensions(new String[]{"*.json"});
+		dialog.setFilterExtensions(new String[]{"*.json;*.JSON;*.xml;*.XML"});
 		String fileName = dialog.open();
 		if (fileName != null){
 			if (activeComp != null){

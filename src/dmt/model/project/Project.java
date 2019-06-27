@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -151,6 +152,26 @@ public class Project implements Serializable{
 		this.server = server;
 	}
 
+	public void checkRename(String tableName, HashMap<String, String> nameChanges) {
+		dataList.remap();
+		TableData tableData = dataList.getData(tableName);
+		dataList.stream()
+				.filter(data->data.getTable().getName().compareTo(tableName) != 0)
+				.forEach(data->{
+					data.getTable().getColumns().forEach(column->{
+						String oldColumnName = column.getName();
+						if (nameChanges.containsKey(oldColumnName)){
+							String newColumnName = nameChanges.get(oldColumnName);
+							data.getTable().setElementName(oldColumnName, newColumnName);
+							Column columnRenamed = data.getTable().getColumn(newColumnName);
+							Column pkColumn = tableData.getTable().getColumn(newColumnName);
+							if (pkColumn != null && columnRenamed != null){
+								columnRenamed.setForeignKey(pkColumn);
+							}
+						}
+					});
 
+				});
+	}
 
 }

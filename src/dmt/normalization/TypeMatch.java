@@ -192,7 +192,7 @@ public class TypeMatch {
 
 	public static Object convert(Object value, Class<?> c){
 		if (value.toString().trim().isEmpty())
-			return null;
+			return value;
 		if (c.equals(Integer.class)){
 			return Integer.valueOf(value.toString());
 		}else if (c.equals(Long.class)){

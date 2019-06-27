@@ -27,7 +27,7 @@ public class Table extends Element implements Cloneable{
 	private boolean haveNestedTables = false;
 	private boolean havePrimaryKey = false;
 	private NormalForm normalForm = NormalForm.NN;
-	
+
 	public Table() {
 		super();
 	}
@@ -281,7 +281,7 @@ public class Table extends Element implements Cloneable{
 	public NormalForm getNormalForm() {
 		return normalForm;
 	}
-	
+
 	public String getNfToString() {
 		if(normalForm == null)
 			normalForm = NormalForm.NN;
@@ -295,6 +295,11 @@ public class Table extends Element implements Cloneable{
 	public void removeColumns(Collection<Column> columns){
 		for (Column column : columns) {
 			removeColumn(column.getName());
+		}
+		niMap = new HashMap<String, Integer>();
+		int index = 0;
+		for (Element element : elements) {
+			niMap.put(element.getName(), index++);
 		}
 	}
 	/**
@@ -439,6 +444,11 @@ public class Table extends Element implements Cloneable{
 					builder.append(" AA");
 				if (sColumn.isUnique())
 					builder.append(" U");
+				if (sColumn.getForeignKey() != null){
+					builder.append(" refrences(");
+					builder.append(sColumn.getForeignKey().getName());
+					builder.append(")");
+				}
 			}
 		}
 		builder.append("\n");

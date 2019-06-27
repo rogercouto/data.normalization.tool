@@ -45,21 +45,23 @@ public class DialogRefineController extends DialogRefine {
 			String columnName = cmbColumn.getText();
 			List<Object> values = data.getColumnValues(columnName);
 			newValues = new LinkedList<>(); 
-			values.forEach(v->{
-				TableItem item = new TableItem(tblValue, SWT.NONE);
-				item.setText(0, v.toString().replace(' ', '_'));
-				String newValue = chkCleanSpaces.getSelection() ? v.toString().trim() : v.toString();
-				if (rdUpper.getSelection()){
-					newValue = newValue.toUpperCase();
-				}else if (rdLower.getSelection()){
-					newValue = newValue.toLowerCase();
-				}else if (rdUpperFirst.getSelection()){
-					boolean iss = chkIgnoreShort.getSelection();
-					newValue = Preprocess.upperFirst(newValue, iss);
-				}
-				newValues.add(newValue);
-				item.setText(1, newValue);
-			});
+			values.stream()
+				.filter(v->v!=null)
+				.forEach(v->{
+					TableItem item = new TableItem(tblValue, SWT.NONE);
+					item.setText(0, v.toString().replace(' ', '_'));
+					String newValue = chkCleanSpaces.getSelection() ? v.toString().trim() : v.toString();
+					if (rdUpper.getSelection()){
+						newValue = newValue.toUpperCase();
+					}else if (rdLower.getSelection()){
+						newValue = newValue.toLowerCase();
+					}else if (rdUpperFirst.getSelection()){
+						boolean iss = chkIgnoreShort.getSelection();
+						newValue = Preprocess.upperFirst(newValue, iss);
+					}
+					newValues.add(newValue);
+					item.setText(1, newValue);
+				});
 			if (rdUpper.getSelection() || rdLower.getSelection() || rdUpperFirst.getSelection() || chkCleanSpaces.getSelection())
 				btnConfirm.setEnabled(true);
 		}

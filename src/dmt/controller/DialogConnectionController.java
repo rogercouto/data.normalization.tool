@@ -48,7 +48,7 @@ public class DialogConnectionController extends DialogConnection {
 		case 1:
 			txtHost.setText("localhost");
 			txtPort.setText("5432");
-			txtUser.setText("posrgres");
+			txtUser.setText("postgres");
 			txtPort.setEnabled(true);
 			txtUser.setEnabled(true);
 			txtPassword.setEnabled(true);
@@ -99,8 +99,10 @@ public class DialogConnectionController extends DialogConnection {
 			break;
 		case 1:
 			server = new PostgresServer(txtHost.getText(), port, txtUser.getText(), txtPassword.getText());
+			break;
 		case 2:
-			server = new SqliteServer(txtHost.getText());	
+			server = new SqliteServer(txtHost.getText());
+			break;
 		default:
 			break;
 		}

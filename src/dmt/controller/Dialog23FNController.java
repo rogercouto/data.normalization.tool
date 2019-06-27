@@ -23,19 +23,19 @@ public class Dialog23FNController extends Dialog23FN {
 	private List<Column> columnsSelected = new ArrayList<>();
 	private List<FD> fds;
 	private DataList dl;
-	
+
 	public Dialog23FNController(Shell parent, TableData data) {
 		super(parent);
 		this.data = data;
 		initialize();
 	}
-	
+
 	private void initialize() {
 		List<Column> uColumns = Normalize.findUniqueColumns(data);
 		columnsAvaliable = data.getTable().getColumns().stream().filter(c->!c.isPrimaryKey()&&!uColumns.contains(c)).collect(Collectors.toList());
 		refresh();
 	}
-	
+
 	private void refresh(){
 		lstAval.removeAll();
 		lstSel.removeAll();
@@ -57,13 +57,13 @@ public class Dialog23FNController extends Dialog23FN {
 			lstSel.add(c.getName());
 		}
 	}
-	
+
 	protected void dobtnAddAllwidgetSelected(SelectionEvent e) {
 		columnsSelected.addAll(columnsAvaliable);
 		columnsAvaliable.clear();
 		refresh();
 	}
-	
+
 	protected void dobtnRemwidgetSelected(SelectionEvent e) {
 		int index = lstSel.getSelectionIndex();
 		if (index >= 0){
@@ -74,13 +74,13 @@ public class Dialog23FNController extends Dialog23FN {
 			lstAval.add(c.getName());
 		}
 	}
-	
+
 	protected void dobtnRemAllwidgetSelected(SelectionEvent e) {
 		columnsAvaliable.addAll(columnsSelected);
 		columnsSelected.clear();
 		refresh();
 	}
-	
+
 	protected void dobtnSearchwidgetSelected(SelectionEvent e) {
 		progressBar.setVisible(true);
 		Display.getDefault().asyncExec(new Runnable() {
@@ -98,10 +98,18 @@ public class Dialog23FNController extends Dialog23FN {
 		    }
 		});
 	}
-	
+
 	protected void dospnCombinwidgetSelected(SelectionEvent e) {
 	}
-	
+
+	protected void dolstFDwidgetSelected(SelectionEvent e) {
+		int index = lstFD.getSelectionIndex();
+		if (index >= 0){
+			FD fd = fds.get(index);
+			txtNewTableName.setText(fd.getFirstDet());
+		}
+	}
+
 	protected void dobtnNormalizewidgetSelected(SelectionEvent e) {
 		int index = lstFD.getSelectionIndex();
 		if (index >= 0){
@@ -109,7 +117,7 @@ public class Dialog23FNController extends Dialog23FN {
 			modelBefore.addTable(data.getTable());
 			modelBefore.calcPositions();
 			FD fd = fds.get(index);
-			dl = Normalize.splitDependences(data, fd);
+			dl = Normalize.splitDependences(data, fd, txtNewTableName.getText());
 			modelAfter.clear();
 			modelAfter.addTables(dl);
 			modelAfter.calcPositions();

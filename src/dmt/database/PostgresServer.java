@@ -100,9 +100,11 @@ public class PostgresServer extends Server {
 			return "char(1)";
 		else if (column.getType().equals(Boolean.class))
 			return "bool";
-		else if (column.getType().equals(Integer.class))
+		else if (column.getType().equals(Integer.class)){
+			if (column.isSurrogateKey())
+				return "serial";
 			return "int";
-		else if (column.getType().equals(Long.class))
+		}else if (column.getType().equals(Long.class))
 			return "int8";
 		else if (column.getType().equals(Float.class))
 			return "float4";
@@ -117,4 +119,12 @@ public class PostgresServer extends Server {
 		return "varchar(255)";
 	}
 
+	public static void main(String[] args) {
+		PostgresServer server = new PostgresServer("localhost", 5432, "postgres", "admin");
+		server.getDatabaseNames().forEach(System.out::println);
+		Connection connection = server.getConnection();
+		
+		System.out.println(connection);
+	}
+	
 }
