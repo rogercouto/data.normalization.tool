@@ -14,21 +14,24 @@ public class Preprocess {
 
 	public static void clusterize(TableData data, String columnName, Cluster cluster, int method){
 		data.getRows().forEach(r->{
-			String oldValue = r.getValue(columnName).toString();
-			String newValue;
-			switch (method) {
-			case CLUSTER_FIRST:
-				newValue = cluster.getFirst(oldValue);
-				break;
-			case CLUSTER_HIGGER:
-				newValue = cluster.getHigher(oldValue);
-				break;
-			default:
-				newValue = cluster.getFirst(oldValue);
-				break;
+			Object value = r.getValue(columnName);
+			if (value != null){
+				String oldValue = value.toString();
+				String newValue;
+				switch (method) {
+				case CLUSTER_FIRST:
+					newValue = cluster.getFirst(oldValue);
+					break;
+				case CLUSTER_HIGGER:
+					newValue = cluster.getHigher(oldValue);
+					break;
+				default:
+					newValue = cluster.getFirst(oldValue);
+					break;
+				}
+				if (newValue != null && oldValue.compareTo(newValue)!=0)
+					r.setValue(columnName, newValue);
 			}
-			if (oldValue.compareTo(newValue)!=0)
-				r.setValue(columnName, newValue);
 		});
 	}
 

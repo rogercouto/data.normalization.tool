@@ -43,24 +43,16 @@ public class Normalize {
             		return null;
             	return dl.getValue(index).toString();
             }).collect(Collectors.toList());
-            Set<String> setStrings = new HashSet<String>();
-            boolean repeated = false;
-            for (String string : strings) {
-                if (setStrings.contains(string)){
-                    repeated = true;
-                    break;
-                }else{
-                    setStrings.add(string);
-                }
-            }
-            if (!repeated){
-                Column c = data.getTable().getColumn(i);
+            HashSet<String> set = new HashSet<>();
+            set.addAll(strings);
+            if (set.size() == data.getRowCount()){
+            	Column c = data.getTable().getColumn(i);
                 list.add(c);
             }
         }
         return list;
     }
-
+    
     private static boolean pkCandidate(String value){
         char[] ca = value.toCharArray();
         for (char c : ca) {
@@ -580,7 +572,6 @@ public class Normalize {
     	if (newName.compareTo(column.getName()) != 0)
     		newTable.setElementName(column.getName(), newName);
     	TableData newData = new TableData(newTable.clone());
-    	IntCounter skg = new IntCounter();
     	data.getRows().forEach(r->{
     		//Colunas diferente de column
     		List<Column> oc = data.getTable().getColumns().stream()
@@ -595,8 +586,6 @@ public class Normalize {
     				oc.forEach(c->{
     					if (!c.isSurrogateKey()){
     						row.setValue(c.getName(), Util.copyObject(r.getValue(c.getName())));
-    					}else{
-    						row.setValue(c.getName(), skg.inc());
     					}
     				});
     				//Setar o novo valor
@@ -616,11 +605,28 @@ public class Normalize {
     	return data;
     }
 
+    public static TableData splitColumns(TableData data, char[] separators, List<Column> columns){
+    	for (Column column : columns) {
+    		data = splitColumn(data, column, separators);
+		}
+    	return data;
+    }
+
     public static TableData splitColumn(TableData data, char[] separators, Column column){
     	return splitColumn(data, column, separators);
     }
+
+    public static void remakeSks(TableData data){
+    	if (!data.getTable().haveSurrogateKey())
+    		return;
+    	IntCounter ic = new IntCounter();
+    	Column sk = data.getTable().getSurrogateKey();
+    	data.getRows().forEach(row->{
+    		row.setValue(sk.getName(), ic.inc());
+    	});
+    }
     /**
-     * Procura pela melhor correspond�ncia de tipo para cada coluna
+     * Procura pela melhor correspondencia de tipo para cada coluna
      * @param data dados
      * @return lista de tipos
      */

@@ -134,7 +134,7 @@ public class Dialog1FN extends Dialog {
 		lblColumn = new Label(composite, SWT.NONE);
 		lblColumn.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false, 1, 1));
 		lblColumn.setText("Column:");
-		lstColumn = new List(composite, SWT.BORDER | SWT.V_SCROLL);
+		lstColumn = new List(composite, SWT.BORDER | SWT.V_SCROLL | SWT.MULTI);
 		lstColumn.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -178,11 +178,11 @@ public class Dialog1FN extends Dialog {
 		lblActual.setText("Actual");
 		lblRefatored = new Label(shell, SWT.NONE);
 		lblRefatored.setText("Refator");
-		modelEditor1 = new CompModelEditorController(shell, SWT.BORDER, SWT.NONE);
+		modelEditor1 = new CompModelEditorController(shell, SWT.BORDER, SWT.V_SCROLL | SWT.H_SCROLL);
 		GridData gd_modelEditor1 = new GridData(SWT.LEFT, SWT.FILL, false, false, 1, 1);
 		gd_modelEditor1.widthHint = 250;
 		modelEditor1.setLayoutData(gd_modelEditor1);
-		modelEditor2 = new CompModelEditorController(shell, SWT.BORDER, SWT.NONE);
+		modelEditor2 = new CompModelEditorController(shell, SWT.BORDER, SWT.V_SCROLL | SWT.H_SCROLL);
 		modelEditor2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		btnConfirm = new Button(shell, SWT.NONE);
 		btnConfirm.addSelectionListener(new SelectionAdapter() {

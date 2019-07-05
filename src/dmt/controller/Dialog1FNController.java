@@ -10,6 +10,7 @@ import dmt.model.Column;
 import dmt.model.data.TableData;
 import dmt.model.project.DataList;
 import dmt.normalization.Normalize;
+import dmt.tools.Options;
 import dmt.tools.Util;
 import dmt.view.Dialog1FN;
 
@@ -49,8 +50,10 @@ public class Dialog1FNController extends Dialog1FN {
 		}
 		refresh();
 	}
-	
+
 	protected void check(){
+		if (seps == null)
+			seps = Options.getDefaultSeparators();
 		columns = Normalize.findMultiValuedColumns(data, seps);
 		lstColumn.removeAll();
 		columns.forEach(c->{
@@ -67,22 +70,29 @@ public class Dialog1FNController extends Dialog1FN {
 			modelEditor2.draw();
 			return;
 		}
-		Column column = columns.get(index);
+		Column selColumn = columns.get(index);
+		List<Column> excludedColumns = new ArrayList<>();
 		if (checkSingle.getSelection()){
-			TableData nd = Normalize.splitColumn(data, seps, column);
+			int[] indices = lstColumn.getSelectionIndices();
+			List<Column> selColumns = new ArrayList<>();
+			for (int i = 0; i < indices.length; i++) {
+				selColumns.add(columns.get(i));
+				excludedColumns.add(columns.get(i));
+			}
+			TableData nd = Normalize.splitColumns(data, seps, selColumns);
 			modelEditor2.addTable(nd.getTable());
 			res = new DataList(nd);
 		}else if (chkMulti.getSelection()){
-			List<TableData> list = Normalize.splitColumnToList(data, seps, column, txtNewTableName.getText());
+			List<TableData> list = Normalize.splitColumnToList(data, seps, selColumn, txtNewTableName.getText());
 			DataList dl = new DataList();
 			list.forEach(d->{
 				modelEditor2.addTable(d.getTable());
 				dl.add(d);
 			});
 			res = dl;
+			excludedColumns.add(selColumn);
 		}
-		List<Column> excludedColumns = new ArrayList<>();
-		excludedColumns.add(column);
+
 		modelEditor1.getFirstModel().setExcludedColumns(excludedColumns);
 		modelEditor1.draw();
 		modelEditor2.calcPositions();
@@ -96,10 +106,18 @@ public class Dialog1FNController extends Dialog1FN {
 	}
 
 	protected void dolstColumnwidgetSelected(SelectionEvent e) {
+		int[] i = lstColumn.getSelectionIndices();
 		int index = lstColumn.getSelectionIndex();
-		if (index >= 0){
-			Column column = columns.get(index);
-			txtNewTableName.setText(column.getName());
+		if (i.length > 0){
+			if (chkMulti.getSelection() && i.length > 1){
+				lstColumn.deselectAll();
+				lstColumn.setSelection(index);
+				Column column = columns.get(index);
+				txtNewTableName.setText(column.getName());
+			}else{
+				txtNewTableName.setText("");
+			}
+
 			refresh();
 		}
 	}

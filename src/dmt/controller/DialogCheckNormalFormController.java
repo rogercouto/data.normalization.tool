@@ -12,6 +12,7 @@ import dmt.model.data.TableData;
 import dmt.normalization.Normalize;
 import dmt.normalization.fd.FD;
 import dmt.normalization.fd.FDMapper;
+import dmt.tools.Options;
 import dmt.view.DialogCheckNormalForm;
 
 public class DialogCheckNormalFormController extends DialogCheckNormalForm{
@@ -26,7 +27,7 @@ public class DialogCheckNormalFormController extends DialogCheckNormalForm{
 		this.data = data;
 		mapper = new FDMapper(data);
 		mapper.setMaxLevel(1);
-		mapper.setMaxData(50);
+		mapper.setMaxData(Options.getDefaultSampleSize());
 		mapper.setTolerance(1.0);
 	}
 

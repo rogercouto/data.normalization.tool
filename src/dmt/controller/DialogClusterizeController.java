@@ -61,33 +61,49 @@ public class DialogClusterizeController extends DialogClusterize{
 	}
 	
 	private void remap(){
-		tree.removeAll();
 		if (cmbColumn.getSelectionIndex() >= 0){
 			cluster = new Cluster(spinner.getSelection());
 			cluster.addAll(data.getColumnValues(cmbColumn.getText()));
-			HashMap<String, List<Counter>> map = cluster.getMap();
-			map.forEach((s,l)->{
-				TreeItem item= new TreeItem(tree, SWT.NONE);
-				item.setText(0, s);
-				if (cmbMethod.getSelectionIndex() == 1)
-					item.setBackground(SWTResourceManager.getColor(SWT.COLOR_YELLOW));
-				else
-					item.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
-				l.forEach(c->{
-					TreeItem sub = new TreeItem(item, SWT.NONE);
-					sub.setText(c.getValue()+" ("+c.getCount()+" )");
-					if (cmbMethod.getSelectionIndex() == 0){
-						OptionalInt oi = l.stream().mapToInt(c2->c2.getCount()).max();
-						if (oi.isPresent()){
-							if (c.getCount() == oi.getAsInt())
-								sub.setBackground(SWTResourceManager.getColor(SWT.COLOR_YELLOW));
-							else
-								sub.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
-						}
+			refresh();
+		}
+	}
+	
+	public void refresh(){
+		tree.removeAll();
+		HashMap<String, List<Counter>> map = cluster.getMap();
+		map.entrySet().stream().filter(e->e.getValue().size() > 1).forEach(e->{
+			TreeItem item= new TreeItem(tree, SWT.NONE);
+			item.setData(e.getKey());
+			item.setText(0, e.getKey());
+			if (cmbMethod.getSelectionIndex() == 1)
+				item.setBackground(SWTResourceManager.getColor(SWT.COLOR_YELLOW));
+			else
+				item.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+			e.getValue().forEach(c->{
+				TreeItem sub = new TreeItem(item, SWT.NONE);
+				sub.setData(e.getKey());
+				sub.setText(c.getValue()+" ("+c.getCount()+" )");
+				if (cmbMethod.getSelectionIndex() == 0){
+					OptionalInt oi = e.getValue().stream().mapToInt(c2->c2.getCount()).max();
+					if (oi.isPresent()){
+						if (c.getCount() == oi.getAsInt())
+							sub.setBackground(SWTResourceManager.getColor(SWT.COLOR_YELLOW));
+						else
+							sub.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
 					}
-				});
-				item.setExpanded(true);
+				}
 			});
+			item.setExpanded(true);
+		});
+	}
+	
+	protected void dobtnRemoveSelwidgetSelected(SelectionEvent e) {
+		TreeItem[] sel = tree.getSelection();
+		if (sel.length == 1){
+			TreeItem item = sel[0];
+			String key = item.getData().toString();
+			cluster.remove(key);
+			refresh();
 		}
 	}
 

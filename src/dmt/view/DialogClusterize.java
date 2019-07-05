@@ -30,6 +30,7 @@ public class DialogClusterize extends Dialog {
 	protected Tree tree;
 	protected Label lblMethod;
 	protected Combo cmbMethod;
+	protected Button btnRemoveSel;
 
 	/**
 	 * Create the dialog.
@@ -105,6 +106,16 @@ public class DialogClusterize extends Dialog {
 		cmbMethod.add("Higher count");
 		cmbMethod.add("First");
 		cmbMethod.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		new Label(grpOptions, SWT.NONE);
+		btnRemoveSel = new Button(grpOptions, SWT.NONE);
+		btnRemoveSel.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				dobtnRemoveSelwidgetSelected(e);
+			}
+		});
+		btnRemoveSel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		btnRemoveSel.setText("Remove sel");
 		tree = new Tree(shell, SWT.BORDER);
 		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		btnConfirm = new Button(shell, SWT.NONE);
@@ -126,5 +137,7 @@ public class DialogClusterize extends Dialog {
 	protected void dospinnerwidgetSelected(SelectionEvent e) {
 	}
 	protected void docmbMethodwidgetSelected(SelectionEvent e) {
+	}
+	protected void dobtnRemoveSelwidgetSelected(SelectionEvent e) {
 	}
 }

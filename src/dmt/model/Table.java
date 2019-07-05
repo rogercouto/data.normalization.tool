@@ -486,6 +486,7 @@ public class Table extends Element implements Cloneable{
 				Column eColumn = (Column)element;
 				Column column = new Column(element.getName());
 				column.setPrimaryKey(eColumn.isPrimaryKey());
+				column.setSurrogateKey(eColumn.isSurrogateKey());
 				column.setForeignKey(eColumn.getForeignKey());
 				column.setNotNull(eColumn.isNotNull());
 				column.setUnique(eColumn.isUnique());

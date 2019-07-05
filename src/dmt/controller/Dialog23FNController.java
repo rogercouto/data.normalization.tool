@@ -2,7 +2,6 @@ package dmt.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Display;
@@ -14,10 +13,13 @@ import dmt.model.project.DataList;
 import dmt.normalization.Normalize;
 import dmt.normalization.fd.FD;
 import dmt.normalization.fd.FDMapper;
+import dmt.tools.IntCounter;
 import dmt.view.Dialog23FN;
 
 public class Dialog23FNController extends Dialog23FN {
 
+	private static final int DEF_SAMPLE = 5000;
+	
 	private TableData data;
 	private List<Column> columnsAvaliable;
 	private List<Column> columnsSelected = new ArrayList<>();
@@ -31,8 +33,11 @@ public class Dialog23FNController extends Dialog23FN {
 	}
 
 	private void initialize() {
-		List<Column> uColumns = Normalize.findUniqueColumns(data);
-		columnsAvaliable = data.getTable().getColumns().stream().filter(c->!c.isPrimaryKey()&&!uColumns.contains(c)).collect(Collectors.toList());
+		columnsAvaliable = FDMapper.getCandidateColumns(data);
+		if (data.getRowCount() < DEF_SAMPLE){
+			spnSample.setSelection(data.getRowCount());
+		}
+		spnSample.setMaximum(data.getRowCount());
 		refresh();
 	}
 
@@ -90,11 +95,30 @@ public class Dialog23FNController extends Dialog23FN {
 		    	fdMapper.setColumns(columnsSelected);
 		    	fdMapper.setMaxLevel(spnCombin.getSelection());
 		    	fdMapper.setMaxData(spnSample.getSelection());
-		    	fdMapper.setTolerance((double)spnTolerance.getSelection()/100.0);
+		    	double tol = (double)spnTolerance.getSelection()/10000.0;
+		    	fdMapper.setTolerance(tol);
 		    	fds = fdMapper.getFDs();
 		    	lstFD.removeAll();
-		    	fds.forEach(fd->lstFD.add(fd.toString()));
+		    	IntCounter ic = new IntCounter();
+		    	fds.forEach(fd->{
+		    			lstFD.add(fd.toString());
+		    				ic.inc(fd.getDestSet().size());
+		    			});
 		    	progressBar.setVisible(false);
+		    	System.out.println("\nDependencies found: "+ic.getValue());
+		    	/*
+		    	ic.setValue(0);
+		    	 	fdMapper.getSingleFDs().forEach(sfd->{
+		    		if (sfd.getOri().compareTo("DS_ENDERECO")==0||sfd.getDest().compareTo("DS_ENDERECO")==0){
+		    			if(sfd.getDep() >= tol){
+		    				System.out.println(sfd);
+		    				ic.inc();
+		    			}
+		    		}
+		    	});
+		    	System.out.println("\nDS_ENDERECO deps: "+ic.getValue());
+		    	*/
+		    	//fdMapper.getSingleFDs().forEach(System.out::println);
 		    }
 		});
 	}

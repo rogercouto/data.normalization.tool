@@ -53,8 +53,8 @@ public class TableModel {
 	private static int calculeWidth(Table t){
 		OptionalInt oMax = t.getElements().stream().mapToInt(e->e.getNameWidth()).max();
 		if (oMax.isPresent()){
-			if (t.getNameWidth()+100 > oMax.getAsInt())
-				return t.getNameWidth()+100;
+			if (t.getNameWidth()+150 > oMax.getAsInt())
+				return t.getNameWidth()+150;
 		}
 		return oMax.isPresent()?oMax.getAsInt()+50:200;
 	}

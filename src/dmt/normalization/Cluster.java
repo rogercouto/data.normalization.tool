@@ -105,6 +105,10 @@ public class Cluster {
 	public HashMap<String, List<Counter>> getMap() {
 		return map;
 	}
+	
+	public void remove(String key){
+		map.remove(key);
+	}
 
 	public void print(){
 		map.forEach((s,l)->{

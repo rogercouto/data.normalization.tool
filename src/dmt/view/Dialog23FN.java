@@ -167,7 +167,7 @@ public class Dialog23FN extends Dialog {
 		lblCominate = new Label(group, SWT.NONE);
 		lblCominate.setText("Max combination:");
 		spnCombin = new Spinner(group, SWT.BORDER);
-		spnCombin.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		spnCombin.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
 		spnCombin.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -177,20 +177,23 @@ public class Dialog23FN extends Dialog {
 		spnCombin.setMaximum(5);
 		spnCombin.setMinimum(1);
 		spnCombin.setSelection(1);
-		new Label(group, SWT.NONE);
 		lblDataSample = new Label(group, SWT.NONE);
 		lblDataSample.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblDataSample.setText("Data sample:");
 		spnSample = new Spinner(group, SWT.BORDER);
-		spnSample.setMaximum(500);
-		spnSample.setMinimum(50);
-		spnSample.setSelection(50);
-		new Label(group, SWT.NONE);
+		spnSample.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+		spnSample.setPageIncrement(100);
+		spnSample.setMaximum(Integer.MAX_VALUE);
+		spnSample.setMinimum(100);
+		spnSample.setSelection(1000);
 		lblTolerance = new Label(group, SWT.NONE);
 		lblTolerance.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblTolerance.setText("Tolerance:");
 		spnTolerance = new Spinner(group, SWT.BORDER);
-		spnTolerance.setSelection(100);
+		spnTolerance.setPageIncrement(1000);
+		spnTolerance.setMaximum(10000);
+		spnTolerance.setDigits(2);
+		spnTolerance.setSelection(10000);
 		label = new Label(group, SWT.NONE);
 		label.setText("%");
 		grpDependences = new Group(composite_1, SWT.NONE);
@@ -209,7 +212,7 @@ public class Dialog23FN extends Dialog {
 		progressBar = new ProgressBar(grpDependences, SWT.NONE);
 		progressBar.setVisible(false);
 		progressBar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		lstFD = new List(grpDependences, SWT.BORDER | SWT.V_SCROLL);
+		lstFD = new List(grpDependences, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
 		lstFD.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

@@ -70,7 +70,11 @@ public class Options {
 	}
 	
 	public static int getDefaultSampleSize(){
-		return 200;
+		return 5000;
+	}
+	
+	public static double maxEmptyRate(){
+		return 0.75;
 	}
 
 }

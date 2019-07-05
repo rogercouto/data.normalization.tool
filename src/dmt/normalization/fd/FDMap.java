@@ -1,5 +1,6 @@
 package dmt.normalization.fd;
 
+import java.util.DoubleSummaryStatistics;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -7,18 +8,18 @@ import dmt.model.data.RowData;
 import dmt.tools.Util;
 
 public class FDMap {
-	
+
 	private Set<String> columnNames;
 	private String destColumnName;
-	
+
 	private HashMap<Object, HashMap<Object, Integer>> map = new HashMap<>();
-	
+
 	public FDMap(Set<String> columnNames, String targetColumnName) {
 		super();
 		this.columnNames = columnNames;
 		this.destColumnName = targetColumnName;
 	}
-	
+
 	public void add(RowData row){
 		StringBuilder builder = new StringBuilder();
 		columnNames.forEach(cn->{
@@ -46,7 +47,7 @@ public class FDMap {
 			}
 		}
 	}
-	
+
 	public double getDependencePerc(Object c1Value){
 		if (map.size() == 1)
 			return 1.0;
@@ -61,6 +62,7 @@ public class FDMap {
 		return (double)max/(double)total;
 	}
 
+	@Deprecated
 	public double getMinDependencePerc(){
 		double min = 1.0;
 		for (Object key : map.keySet()) {
@@ -70,11 +72,17 @@ public class FDMap {
 		}
 		return min;
 	}
-	
+
+	public double getAvgDependencePerc(){
+		DoubleSummaryStatistics st = map.entrySet().stream().mapToDouble(e-> getDependencePerc(e.getKey())).summaryStatistics();
+		return st.getAverage();
+	}
+
+
 	public String getKey(){
 		return Util.concat(columnNames);
 	}
-	
+
 	public String getDestColumnName(){
 		return destColumnName;
 	}
@@ -82,5 +90,5 @@ public class FDMap {
 	public Set<String> getKeySet(){
 		return columnNames;
 	}
-	
+
 }
