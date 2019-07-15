@@ -19,7 +19,7 @@ import dmt.input.CSVReader;
 import dmt.model.Column;
 import dmt.model.data.RowData;
 import dmt.model.data.TableData;
-import dmt.normalization.Normalize;
+import dmt.normalization.NormUtil;
 import dmt.tools.IntCounter;
 import dmt.tools.Options;
 import dmt.tools.Util;
@@ -84,7 +84,8 @@ public class FDMapper {
 	}
 
 	public static List<Column> getCandidateColumns(TableData data){
-		List<Column> uColumns = Normalize.findUniqueColumns(data);
+		NormUtil normalization = new NormUtil(data);
+		List<Column> uColumns = normalization.findUniqueColumns();
 		return data.getTable()
 				.getColumns()
 				.stream()
@@ -264,7 +265,7 @@ public class FDMapper {
 		CSVReader reader = new CSVReader("data/test/upa.csv");
 		String[][] sample = reader.getSample(',', '"', -1);
 		TableData data = reader.getData(sample);
-		test2(data);
+		test3(data);
 		//getCandidateColumns(data).forEach(c->System.out.println(c.getName()));
 	}
 
@@ -284,7 +285,8 @@ public class FDMapper {
 	}
 
 	protected static void test1(TableData data){
-		List<Column> uColumns = Normalize.findUniqueColumns(data);
+		NormUtil normalization = new NormUtil(data);
+		List<Column> uColumns = normalization.findUniqueColumns();
 		List<Column> columns = data.getTable()
 				.getColumns()
 				.stream()
@@ -344,4 +346,38 @@ public class FDMapper {
 		mapper.getSingleFDs().forEach(System.out::println);
 	}
 	
+	protected static void test3(TableData data){
+		FDMapper mapper = new FDMapper(data);
+		mapper.setMaxLevel(1);
+		mapper.setMaxData(data.getRowCount());
+		List<Column> columns = new ArrayList<>();
+		columns.add(data.getTable().getColumn("municipio"));
+		columns.add(data.getTable().getColumn("unidade_federativa"));
+		mapper.setColumns(columns);
+		HashMap<String, HashMap<String,FDMap>> map = mapper.generateMap();
+		map.forEach((s,subHash)->{
+			subHash.forEach((ss, fdMap)->{
+				HashMap<Object, HashMap<Object, Integer>> m = fdMap.getMap();
+				m.forEach((k,h)->{
+					if (h.keySet().size() > 1)
+						System.out.print("*****");
+					System.out.print(k);
+					System.out.print(": ");
+					System.out.print("[");
+					IntCounter ic = new IntCounter();
+					h.forEach((o,i)->{
+						if (ic.getValue() > 0)
+							System.out.print(", ");
+						System.out.print(o.toString());
+						System.out.print(" : ");
+						System.out.print(i);
+						ic.inc();
+					});
+					System.out.print("]");
+					System.out.println();
+				});
+				System.out.println("");
+			});
+		});
+	}
 }

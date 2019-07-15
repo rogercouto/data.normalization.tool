@@ -9,7 +9,9 @@ import org.eclipse.swt.widgets.Shell;
 import dmt.model.Column;
 import dmt.model.data.TableData;
 import dmt.model.project.DataList;
-import dmt.normalization.Normalize;
+import dmt.normalization.DataDivision;
+import dmt.normalization.NormUtil;
+import dmt.normalization.DataReplication;
 import dmt.tools.Options;
 import dmt.tools.Util;
 import dmt.view.Dialog1FN;
@@ -44,7 +46,8 @@ public class Dialog1FNController extends Dialog1FN {
 	}
 	protected void dochkMultiwidgetSelected(SelectionEvent e) {
 		txtNewTableName.setEnabled(true);
-		List<Column> columns = Normalize.findMultiValuedColumns(data, seps);
+		NormUtil normalization = new NormUtil(data);
+		List<Column> columns = normalization.findMultiValuedColumns(seps);
 		if (columns.size() > 0){
 			txtNewTableName.setText(Util.toSingular(columns.get(0).getName()));
 		}
@@ -54,7 +57,8 @@ public class Dialog1FNController extends Dialog1FN {
 	protected void check(){
 		if (seps == null)
 			seps = Options.getDefaultSeparators();
-		columns = Normalize.findMultiValuedColumns(data, seps);
+		NormUtil normalization = new NormUtil(data);
+		columns = normalization.findMultiValuedColumns(seps);
 		lstColumn.removeAll();
 		columns.forEach(c->{
 			lstColumn.add(c.getName());
@@ -79,11 +83,13 @@ public class Dialog1FNController extends Dialog1FN {
 				selColumns.add(columns.get(i));
 				excludedColumns.add(columns.get(i));
 			}
-			TableData nd = Normalize.splitColumns(data, seps, selColumns);
+			DataReplication dr = new DataReplication(data);
+			TableData nd = dr.splitColumns(seps, selColumns);
 			modelEditor2.addTable(nd.getTable());
 			res = new DataList(nd);
 		}else if (chkMulti.getSelection()){
-			List<TableData> list = Normalize.splitColumnToList(data, seps, selColumn, txtNewTableName.getText());
+			DataDivision dd = new DataDivision(data);
+			List<TableData> list = dd.splitColumnToList(seps, selColumn, txtNewTableName.getText());
 			DataList dl = new DataList();
 			list.forEach(d->{
 				modelEditor2.addTable(d.getTable());

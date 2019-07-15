@@ -15,7 +15,7 @@ import dmt.model.Column;
 import dmt.model.data.NormalForm;
 import dmt.model.data.TableData;
 import dmt.model.project.DataList;
-import dmt.normalization.Normalize;
+import dmt.normalization.NormUtil;
 import dmt.tools.Options;
 import dmt.tools.Util;
 import dmt.view.CompDataEditor;
@@ -111,7 +111,8 @@ public class CompDataEditorController extends CompDataEditor {
 			}
 		}
 		if (seps != null){
-			Normalize.findMultiValuedColumns(data, seps).forEach(c->{
+			NormUtil normalization = new NormUtil(data);
+			normalization.findMultiValuedColumns(seps).forEach(c->{
 				int index = data.getTable().getElementIndex(c.getName());
 				if (index < table.getColumnCount()){
 					for (int i = 0; i < table.getItemCount(); i++) {

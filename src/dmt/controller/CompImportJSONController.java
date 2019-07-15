@@ -14,7 +14,11 @@ import dmt.model.Column;
 import dmt.model.Table;
 import dmt.model.data.TableData;
 import dmt.model.project.DataList;
-import dmt.normalization.Normalize;
+import dmt.normalization.DataDivision;
+import dmt.normalization.DataReplication;
+import dmt.normalization.TableDivision;
+import dmt.normalization.TableReplication;
+import dmt.preprocess.Preprocess;
 import dmt.view.CompImportJSON;
 import dmt.view.TableModel;
 
@@ -83,13 +87,15 @@ public class CompImportJSONController extends CompImportJSON{
 		modelEditor2.clear();
 		modelEditor2.draw();
 		if (btnReplicate.getSelection()){
-			Table newTable = Normalize.mixNestedTables(table);
+			TableReplication tr = new TableReplication(table);
+			Table newTable = tr.mixNestedTables();
 			modelEditor2.addTable(newTable);
 			modelEditor2.calcPositions();
 		}else if (btnSplit.getSelection()){
 			Table nTable = table.clone();
 			nTable.createSurrogateKey();
-			List<Table> list = Normalize.splitNestedTables(nTable);
+			TableDivision td = new TableDivision(nTable);
+			List<Table> list = td.splitNestedTables();
 			modelEditor2.addTables(list);
 			modelEditor2.calcPositions();
 		}
@@ -99,18 +105,20 @@ public class CompImportJSONController extends CompImportJSON{
 		final DataList dataList = new DataList();
 		if (btnReplicate.getSelection()){
 			String content = reader.getContent();
-			TableData data = Normalize.mixNestedData(table, content);
+			DataReplication dr = new DataReplication(new TableData(table));
+			TableData data = dr.splitNestedData(content);
 			dataList.add(data);
 		}else if (btnSplit.getSelection()){
 			String content = reader.getContent();
-			dataList.addAll(Normalize.splitNestedData(table, content));
+			DataDivision dd = new DataDivision(new TableData(table));
+			dataList.addAll(dd.splitNestedData(content));
 		}
 		HashMap<String, List<String>> map = modelEditor2.getExcludedColumnNames();
 		map.forEach((s,l)->{
 			if (l.size() > 0){
 				Optional<TableData> oData = dataList.stream().filter(dl->dl.getTable().getName().compareTo(s) == 0).findFirst();
 				if (oData.isPresent()){
-					TableData data = Normalize.removeColumnsByNames(oData.get(), l);
+					TableData data = Preprocess.removeColumnsByNames(oData.get(), l);
 					dataList.replace(data);
 				}
 			}

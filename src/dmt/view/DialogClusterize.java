@@ -38,7 +38,7 @@ public class DialogClusterize extends Dialog {
 	 * @param style
 	 */
 	public DialogClusterize(Shell parent) {
-		super(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
+		super(parent, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
 		createContents();
 	}
 

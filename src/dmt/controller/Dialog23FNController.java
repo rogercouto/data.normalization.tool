@@ -10,7 +10,7 @@ import org.eclipse.swt.widgets.Shell;
 import dmt.model.Column;
 import dmt.model.data.TableData;
 import dmt.model.project.DataList;
-import dmt.normalization.Normalize;
+import dmt.normalization.DataDivision;
 import dmt.normalization.fd.FD;
 import dmt.normalization.fd.FDMapper;
 import dmt.tools.IntCounter;
@@ -101,7 +101,7 @@ public class Dialog23FNController extends Dialog23FN {
 		    	lstFD.removeAll();
 		    	IntCounter ic = new IntCounter();
 		    	fds.forEach(fd->{
-		    			lstFD.add(fd.toString());
+		    				lstFD.add(fd.toString());
 		    				ic.inc(fd.getDestSet().size());
 		    			});
 		    	progressBar.setVisible(false);
@@ -141,7 +141,8 @@ public class Dialog23FNController extends Dialog23FN {
 			modelBefore.addTable(data.getTable());
 			modelBefore.calcPositions();
 			FD fd = fds.get(index);
-			dl = Normalize.splitDependences(data, fd, txtNewTableName.getText());
+			DataDivision dd = new DataDivision(data);
+			dl = dd.splitDependences(fd, txtNewTableName.getText());
 			modelAfter.clear();
 			modelAfter.addTables(dl);
 			modelAfter.calcPositions();

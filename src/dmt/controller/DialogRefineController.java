@@ -13,7 +13,7 @@ import org.eclipse.swt.widgets.TableItem;
 import dmt.model.Column;
 import dmt.model.data.RowData;
 import dmt.model.data.TableData;
-import dmt.normalization.Preprocess;
+import dmt.preprocess.Preprocess;
 import dmt.view.DialogRefine;
 
 public class DialogRefineController extends DialogRefine {

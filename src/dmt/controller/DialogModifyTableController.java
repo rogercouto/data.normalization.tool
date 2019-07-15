@@ -19,8 +19,8 @@ import dmt.database.DataTypes;
 import dmt.model.Column;
 import dmt.model.Table;
 import dmt.model.data.TableData;
-import dmt.normalization.Normalize;
-import dmt.normalization.Preprocess;
+import dmt.normalization.NormUtil;
+import dmt.preprocess.Preprocess;
 import dmt.view.DialogModifyTable;
 
 public class DialogModifyTableController extends DialogModifyTable{
@@ -66,7 +66,8 @@ public class DialogModifyTableController extends DialogModifyTable{
 			editor0.grabHorizontal = true;
 			editor0.setEditor(text, item, 0);
 			//Type combo
-			Class<?> bm = Normalize.getBestMatchType(data, c.getName());
+			NormUtil normalization = new NormUtil(data);
+			Class<?> bm = normalization.getBestMatchType(c.getName());
 			TableEditor editor1 = new TableEditor(tblModifier);
 			CCombo combo = new CCombo(tblModifier, SWT.READ_ONLY);
 			//combo.setText(c.getType().getSimpleName());
@@ -110,7 +111,8 @@ public class DialogModifyTableController extends DialogModifyTable{
 			if (remChecks.get(i).getSelection())
 				remColumns.add(data.getTable().getColumn(i));
 		}
-		Preprocess.editTable(data, tableName, newColumnNames, types, remColumns);
+		Preprocess preprocess = new Preprocess(data);
+		preprocess.editTable(tableName, newColumnNames, types, remColumns);
 		result = true;
 		shell.close();
 	}

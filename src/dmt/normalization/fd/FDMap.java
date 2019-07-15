@@ -91,4 +91,7 @@ public class FDMap {
 		return columnNames;
 	}
 
+	protected HashMap<Object, HashMap<Object, Integer>> getMap(){
+		return map;
+	}
 }

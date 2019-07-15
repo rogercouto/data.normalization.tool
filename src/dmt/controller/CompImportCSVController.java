@@ -17,7 +17,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 
 import dmt.input.MatrixReader;
 import dmt.model.data.TableData;
-import dmt.normalization.Normalize;
+import dmt.normalization.NormUtil;
 import dmt.tools.Options;
 import dmt.view.CompImportCSV;
 
@@ -202,8 +202,10 @@ public class CompImportCSVController extends CompImportCSV{
 			reader.setEnd(spinnerEnd.getSelection());
 			reader.setCreateSurrogateKeys(true);
 			TableData data = reader.getData(subMatrix());
-			if (comboTypes.getSelectionIndex() == 1)
-				Normalize.matchBestTypes(data);
+			if (comboTypes.getSelectionIndex() == 1){
+				NormUtil normalization = new NormUtil(data);
+				normalization.matchBestTypes();
+			}
 			if (importListener != null){
 				Event event = new Event();
 				event.data = data;

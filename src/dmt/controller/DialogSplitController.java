@@ -11,7 +11,7 @@ import org.eclipse.swt.widgets.TableItem;
 
 import dmt.model.Column;
 import dmt.model.data.TableData;
-import dmt.normalization.Normalize;
+import dmt.preprocess.Preprocess;
 import dmt.view.DialogSplit;
 
 public class DialogSplitController extends DialogSplit {
@@ -84,7 +84,8 @@ public class DialogSplitController extends DialogSplit {
 
 	protected void dobtnConfirmwidgetSelected(SelectionEvent e) {
 		if (values.size() == c1Values.size() && values.size() == c2Values.size()){
-			result = Normalize.splitColumn(data, cmbColumn.getText(), txtFirstColumn.getText(), txtSecondColumn.getText(), c1Values, c2Values);
+			Preprocess preprocess = new Preprocess(data);
+			result = preprocess.splitColumn(cmbColumn.getText(), txtFirstColumn.getText(), txtSecondColumn.getText(), c1Values, c2Values);
 			shell.close();
 		}
 	}

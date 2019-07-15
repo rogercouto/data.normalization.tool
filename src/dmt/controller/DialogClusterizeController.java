@@ -12,9 +12,9 @@ import org.eclipse.wb.swt.SWTResourceManager;
 
 import dmt.model.Column;
 import dmt.model.data.TableData;
-import dmt.normalization.Cluster;
-import dmt.normalization.Counter;
-import dmt.normalization.Preprocess;
+import dmt.preprocess.Cluster;
+import dmt.preprocess.WordCounter;
+import dmt.preprocess.Preprocess;
 import dmt.view.DialogClusterize;
 
 public class DialogClusterizeController extends DialogClusterize{
@@ -46,7 +46,8 @@ public class DialogClusterizeController extends DialogClusterize{
 			throw new RuntimeException("DialogClusterize.dobtnConfirmwidgetSelected: cluster not set!");
 		String columnName = cmbColumn.getText();
 		if (columnName != null && columnName.trim().length() > 0){
-			Preprocess.clusterize(data, columnName, cluster, 
+			Preprocess preprocess = new Preprocess(data);
+			preprocess.clusterize(columnName, cluster, 
 					(cmbMethod.getSelectionIndex() == 0)? Preprocess.CLUSTER_HIGGER : Preprocess.CLUSTER_FIRST);
 			shell.close();
 		}
@@ -70,7 +71,7 @@ public class DialogClusterizeController extends DialogClusterize{
 	
 	public void refresh(){
 		tree.removeAll();
-		HashMap<String, List<Counter>> map = cluster.getMap();
+		HashMap<String, List<WordCounter>> map = cluster.getMap();
 		map.entrySet().stream().filter(e->e.getValue().size() > 1).forEach(e->{
 			TreeItem item= new TreeItem(tree, SWT.NONE);
 			item.setData(e.getKey());

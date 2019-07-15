@@ -94,6 +94,8 @@ public class CSVReader {
 						delimitated = false;
 					}
 				}
+				if (!delimitated)
+					builder.append(";");
 				String fullLine = builder.toString();
 				builder = new StringBuilder();
 				String[] line = splitLine(fullLine, separator, stringDelimiter);

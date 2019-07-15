@@ -9,7 +9,7 @@ import org.eclipse.swt.widgets.Shell;
 import dmt.model.Column;
 import dmt.model.data.NormalForm;
 import dmt.model.data.TableData;
-import dmt.normalization.Normalize;
+import dmt.normalization.NormUtil;
 import dmt.normalization.fd.FD;
 import dmt.normalization.fd.FDMapper;
 import dmt.tools.Options;
@@ -52,7 +52,8 @@ public class DialogCheckNormalFormController extends DialogCheckNormalForm{
 
 	protected void dobtnCheckwidgetSelected(SelectionEvent e) {
 		seps = getSeparators();
-		List<Column> columns = Normalize.findMultiValuedColumns(data, seps);
+		NormUtil normalization = new NormUtil(data);
+		List<Column> columns = normalization.findMultiValuedColumns(seps);
 		if (columns.size() == 0){
 			txt1FN.setText("table in 1FN: no multiple values found");
 			data.setNormalForm(NormalForm.NF1);

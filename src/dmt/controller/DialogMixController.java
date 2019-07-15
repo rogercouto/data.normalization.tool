@@ -11,7 +11,7 @@ import org.eclipse.swt.widgets.TableItem;
 
 import dmt.model.Column;
 import dmt.model.data.TableData;
-import dmt.normalization.Normalize;
+import dmt.preprocess.Preprocess;
 import dmt.tools.IntCounter;
 import dmt.view.DialogMix;
 
@@ -85,7 +85,7 @@ public class DialogMixController extends DialogMix {
 	}
 
 	protected void dobtnConfirmwidgetSelected(SelectionEvent e) {
-		TableData newData = Normalize.mixColumns(data, combo1.getText(), combo2.getText(),
+		TableData newData = Preprocess.mixColumns(data, combo1.getText(), combo2.getText(),
 				txtColumnName.getText(), txtDiv.getText(), btnKeepOriginalColumns.getSelection());
 		if (newData != null){
 			result = newData;

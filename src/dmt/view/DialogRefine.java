@@ -100,7 +100,7 @@ public class DialogRefine extends Dialog {
 				dochkCleanSpaceswidgetSelected(e);
 			}
 		});
-		chkCleanSpaces.setText("Clean extremity spaces ( show as _ )");
+		chkCleanSpaces.setText("Clean trailing spaces ( show as _ )");
 		new Label(grpOptions, SWT.NONE);
 		composite = new Composite(grpOptions, SWT.NONE);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
